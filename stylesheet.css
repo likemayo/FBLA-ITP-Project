@@ -46,6 +46,17 @@ input::placeholder{
 .show {
     display: inline;
 }
+
+.erorr {
+    border: 1px solid #d33;
+}
+.error-msg {
+    display: block;
+    color: #d33;
+    font-size:12px;
+    min-height: 14px;
+    margin-top: 2px;
+}
 /*--------------------------------------------------- START SCREEN --------------------------------------------*/
 
 h1{

@@ -44,8 +44,85 @@ document.addEventListener('DOMContentLoaded', function() {
         input.classList.remove('hide');
         input.classList.add('show');
     };
+    function showError(inputElement, errorElement, message){
+        inputElement.classList.add('error');
+        errorElement.textContent = message;
+    }
+
+    function clearError(inputElement, errorElement) {
+        inputElement.classList.remove('error');
+        errorElement.textContent = '';
+    }
+
+    function validateInputs() {
+        const userNameError = document.getElementById('userNameError');
+        const petNameError = document.getElementById('petNameError');
+        const petTypeError = document.getElementById('petTypeError');
+        const savingsGoalError = document.getElementById('savingsGoalError');
+
+        clearError(userName, userNameError);
+        clearError(petName, petNameError);
+        clearError(petType, petTypeError);
+        clearError(savingsGoal, savingsGoalError);
+
+        let isValid = true;
+
+        // username validation
+        const trimmedUserName = userName.value.trim();
+
+        if (trimmedUserName === ''){
+            showError(userName, userNameError, 'Name is required');
+            isValid = false;
+        } else if (trimmedUserName.length > 24) {
+            showError(userName, userNameError, 'Name must be 24 characters or less');
+            isValid = false;
+        }
+
+        // pet name validation
+
+        const trimmedPetName = petName.value.trim()
+
+        if (trimmedPetName === ''){
+            shsowError(petName, petNameError, 'Pet name is required');
+            isValid = false;
+        } else if (trimmedPetName.length > 24) {
+            showErorr(petName, petNameError, 'Pet name must be 24 characters or less');
+        }
+
+        // pet type validation
+
+        if (perType.value === '') {
+            showError(petType, petTypeError, 'Please select pet type');
+        }
+
+        // goal validation
+
+        const goalVal = parseFloat(savingsGoal.value)
+
+        if (savingsGoal.value === '' || isNaN(goalVal)){
+            showError(savingsGoal, savingsGoalError, "Savings goal must be a number");
+            isValid = false;
+        } else if (goalVal < 1){
+            showError(savingsGoal, savingsGoalError, "Goal must be at least $1");
+            isValid = false;
+        } else if (goalVal > 500) {
+            showError(savingsGoal, savingsGoalError, "Goal must be less than $500");
+            isValid = false;
+        }
+
+
+        return isValid;
+
+    }
+
+
 
     submitInputs.onclick = function() {
+
+        if (!validateInputs()) {
+            return;
+        }
+        
         userNameDisplay.textContent = "Hello, " + userName.value;
         petNameDisplay.textContent = petName.value;
 
