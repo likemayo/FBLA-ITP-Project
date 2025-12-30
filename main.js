@@ -51,6 +51,10 @@ let logArea = document.getElementById("logArea");
 // Load DOM content first before running any functions to ensure there's no errors
 
 document.addEventListener("DOMContentLoaded", function(){
+    const savedState = loadGame();
+    if (savedState) {
+    }
+
     playButton.onclick = function(){
         play.classList.add('hide');
         input.classList.remove('hide');
@@ -208,6 +212,7 @@ document.addEventListener("DOMContentLoaded", function(){
         ageStats.textContent = "Age: " + age + " years";
 
         updatePetReaction();
+        saveGame();
     }
 
     // UPDATE SCREEN FUNCTIONS
@@ -224,6 +229,7 @@ document.addEventListener("DOMContentLoaded", function(){
         moneySaved.textContent = "money saved: $" + money;
         goal.textContent = "Goal: $" + savingsGoal.value + " (" + percent + "%)";
         updatePetReaction();
+        saveGame();
     } // updates stats, amount of money, and percent of money saved
 
     function log(message) {
