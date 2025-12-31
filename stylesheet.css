@@ -47,7 +47,7 @@ input::placeholder{
     display: inline;
 }
 
-.erorr {
+.error {
     border: 1px solid #d33;
 }
 .error-msg {

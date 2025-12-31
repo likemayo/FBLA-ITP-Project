@@ -1,8 +1,19 @@
-// PLAY SETION VARIABLES
+// play section variables 
+
 let play = document.getElementById("play");
 let playButton = document.getElementById("playButton");
 
-// GAME SECTION VARIABLES
+
+// input section variables
+
+const input = document.getElementById("input");
+const userName = document.getElementById("userName");
+const petName = document.getElementById("petName");
+const petType = document.getElementById("petType");
+const savingsGoal = document.getElementById("savingsGoal");
+const submitInputs = document.getElementById("submitInputs");
+
+// game section variables
 
 let game = document.getElementById("game");
 
@@ -38,7 +49,8 @@ let moneySaved = document.getElementById("moneySaved");
 let goal = document.getElementById("goal");
 let money = 10;
 
-// ACTION BUTTON VARIABLES
+// action button variables
+
 let feedBtn = document.getElementById("feedBtn");
 let playBtn = document.getElementById("playBtn");
 let restBtn = document.getElementById("restBtn");
@@ -48,144 +60,47 @@ let choresBtn = document.getElementById("choresBtn");
 
 let logArea = document.getElementById("logArea");
 
-// Load DOM content first before running any functions to ensure there's no errors
+// load DOM content first before running any onclick functions tot enure there's no issues
 
 document.addEventListener("DOMContentLoaded", function(){
-    const savedState = loadGame();
-    if (savedState) {
+    const hasSavedGame = loadGame();
+
+    if (hasSavedGame) {
+        // ask user if they want to continue
+        const continueGame = confirm("Found a saved game! Continue where you left off?");
+
+        if (continueGame) {
+            // skip input screen, go straight to game
+            applyLoadedState(hasSavedGame);
+
+            play.classList.add("hide");
+            input.classList.add('hide');
+            game.classList.remove('hide');
+            game.classList.add("show");
+
+            // display loaded state
+
+            userNameDisplay.textContent = "Hello, " + userName.value;
+            petNameDisplay.textContent = petName.value;
+
+            updateStats();
+        } else {
+            // directs user to sign in section 
+            userName.value = '';
+            petName.value = '';
+            petType.value = '';
+            savingsGoal.value = '';
+        }
     }
 
+    // directs user to sign in section
     playButton.onclick = function(){
         play.classList.add('hide');
         input.classList.remove('hide');
         input.classList.add('show');
-    } // directs user to sign in section
-    function showError(inputElement, errorElement, message){
-        inputElement.classList.add('error');
-        errorElement.textContent = message;
-    } // shows error under input label in case of invalid inputs
-
-    function clearError(inputElement, errorElement) {
-        inputElement.classList.remove('error');
-        errorElement.textContent = '';
     }
 
-        function showError(inputElement, errorElement, message){
-        inputElement.classList.add('error');
-        errorElement.textContent = message;
-    }
-
-    function clearError(inputElement, errorElement) {
-        inputElement.classList.remove('error');
-        errorElement.textContent = '';
-    }
-
-    function validateInputs() {
-        const input = document.getElementById("input");
-        const userName = document.getElementById("userName");
-        const petName = document.getElementById("petName");
-        const petType = document.getElementById("petType");
-        const savingsGoal = document.getElementById("savingsGoal")
-        const submitInputs = document.getElementById("submitInputs");
-
-        const userNameError = document.getElementById('userNameError');
-        const petNameError = document.getElementById('petNameError');
-        const petTypeError = document.getElementById('petTypeError');
-        const savingsGoalError = document.getElementById('savingsGoalError');
-        const goalVal = parseFloat(savingsGoal.value);
-
-        clearError(userName, userNameError);
-        clearError(petName, petNameError);
-        clearError(petType, petTypeError);
-        clearError(savingsGoal, savingsGoalError);
-
-        let isValid = true;
-
-        // username validation
-        const trimmedUserName = userName.value.trim();
-
-        if (trimmedUserName === ''){
-            showError(userName, userNameError, 'Name is required');
-            isValid = false;
-        } else if (trimmedUserName.length > 24) {
-            showError(userName, userNameError, 'Name must be 24 characters or less');
-            isValid = false;
-        }
-
-        // pet name validation
-
-        const trimmedPetName = petName.value.trim()
-
-        if (trimmedPetName === ''){
-            showError(petName, petNameError, 'Pet name is required');
-            isValid = false;
-        } else if (trimmedPetName.length > 24) {
-            showError(petName, petNameError, 'Pet name must be 24 characters or less');
-        }
-
-        // pet type validation
-
-        if (petType.value === '') {
-            showError(petType, petTypeError, 'Please select pet type');
-        }
-        // goal validation
-
-        if (savingsGoal.value === '' || isNaN(goalVal)){
-            showError(savingsGoal, savingsGoalError, "Savings goal must be a number");
-            isValid = false;
-        } else if (goalVal < 1){
-            showError(savingsGoal, savingsGoalError, "Goal must be at least $1");
-            isValid = false;
-        } else if (goalVal > 500) {
-            showError(savingsGoal, savingsGoalError, "Goal must be less than or equal to $500");
-            isValid = false;
-        }
-        return isValid;
-    }
-
-    //PET REACTIONS
-    function getPetEmotion() {
-        if (health <= 30) {
-            return { emotion: 'sick', emoji: '🤒', status: 'Your pet is very sick!' };
-        }
-        if (hunger >= 80) {
-            return { emotion: 'hungry', emoji: '😫', status: 'Your pet is starving!' };
-        }
-        if (energy <= 20) {
-            return { emotion: 'tired', emoji: '😴', status: 'Your pet is exhausted.' };
-        }
-        if (happiness <= 40 || health <= 40) {
-            return { emotion: 'sad', emoji: '😢', status: 'Your pet is sad.' };
-        }
-        if (energy >= 85 && happiness >= 75) {
-            return { emotion: 'energetic', emoji: '🤩', status: 'Your pet is full of energy!' };
-        }
-        if (happiness >= 80 && energy >= 70 && hunger <= 30) {
-            return { emotion: 'happy', emoji: '😊', status: 'Your pet is very happy!' };
-        }
-        return { emotion: 'neutral', emoji: '🙂', status: 'Your pet is okay.' };
-    }
-
-    function updatePetReaction() {
-        const petEmojiEl = document.getElementById('petEmoji');
-        const emotionEmojiEl = document.getElementById('emotionEmoji');
-        const petStatusEl = document.getElementById('petStatus');
-        
-        const reaction = getPetEmotion();
-        
-        // Show pet type emoji (big)
-        petEmojiEl.textContent = petEmojis[petType.value] || '🐾';
-        // Show emotion emoji (smaller)
-        emotionEmojiEl.textContent = reaction.emoji;
-        // Show status
-        petStatusEl.textContent = reaction.status;
-        
-        // Apply background color
-        const petReactionDiv = document.getElementById('petReaction');
-        petReactionDiv.className = '';
-        petReactionDiv.classList.add(reaction.emotion);
-    }
-
+    // submits username, pet name, etc.
     submitInputs.onclick = function() {
 
         if (!validateInputs()) {
@@ -195,7 +110,7 @@ document.addEventListener("DOMContentLoaded", function(){
         userNameDisplay.textContent = "Hello, " + userName.value;
         petNameDisplay.textContent = petName.value;
 
-        percent = money / parseInt(savingsGoal.value) * 100;
+        let percent = money / parseInt(savingsGoal.value) * 100;
 
         moneySaved.textContent = "Money saved: $" + money;
         goal.textContent = "Goal: $" + savingsGoal.value + " (" + percent + "%)";
@@ -215,45 +130,27 @@ document.addEventListener("DOMContentLoaded", function(){
         saveGame();
     }
 
-    // UPDATE SCREEN FUNCTIONS
-    function updateStats() {
-        hungerStats.textContent = "Hunger: " + hunger + "%";
-        happinessStats.textContent = "Happiness: " + happiness + "%";
-        energyStats.textContent = "Energy: " + energy + "%";
-        cleanlinessStats.textContent = "Cleanliness: " + cleanliness + "%";
-        healthStats.textContent = "Health: " + health + "%";
-        ageStats.textContent = "Age: " + age + " years";
-        
-        
-        let percent = Math.floor((money / parseInt(savingsGoal.value)) * 100);
-        moneySaved.textContent = "money saved: $" + money;
-        goal.textContent = "Goal: $" + savingsGoal.value + " (" + percent + "%)";
-        updatePetReaction();
-        saveGame();
-    } // updates stats, amount of money, and percent of money saved
+    // action buttons
 
-    function log(message) {
-        let entry = document.createElement("p");
-        entry.textContent = message;
-        logArea.appendChild(entry);
-        logArea.scrollTop = logArea.scrollHeight;
-    } // logs which action buttoms were pressed
-
-
+    // feeds pet
     feedBtn.onclick = function() {
-    if (money >= 5) {
-        money -= 5;
-        hunger = Math.max(0, hunger - 20);
-        happiness += 5;
-        log("You fed your pet. -$5");
-    } else {
-        log("Not enough money to feed your pet.");
-    } // feeds pet -- first checks if player has enough money
+        // first checks if player has enough money
+        if (money >= 5) {
+            money -= 5;
+            hunger = Math.max(0, hunger - 20);
+            happiness += 5;
+            log("You fed your pet. -$5");
+        } else {
+            log("Not enough money to feed your pet.");
+        }
 
-    updateStats(); // updates stats immediately after
+        // updates stats immediately after
+        updateStats();
     };
 
-    playBtn.onclick = function() {
+    // plays with pet
+
+    playBtn.onclick = function(){
         if (money >= 2) {
             money -= 2;
             happiness += 15;
@@ -263,93 +160,274 @@ document.addEventListener("DOMContentLoaded", function(){
             log("Not enough money to play.");
         }
 
-        updateStats(); // updates stats immediately after
-    };
+        // updates stats immediately after
+        updateStats();
+    }
 
     restBtn.onclick = function() {
         energy = Math.min(100, energy + 20);
         happiness -= 5;
-        log("Your pet took a rest.");
-        updateStats(); // updates stats immediately after
-    };
+        log("You pet took a rest.");
+
+        // updates stats immediately after
+        updateStats();
+    }
 
     cleanBtn.onclick = function() {
         if (money >= 2) {
             money -= 2;
 
-            if (health < 97) {
-                health += 3;
-            }
-            if (cleanliness < 95) {
-                cleanliness += 5;
-            }
+            health = Math.min(100, health + 3);
+
+            cleanliness = Math.min(100, cleanliness + 5);
+
             log("You cleaned your pet. -$2");
         } else {
             log("Not enough money to clean your pet.");
         }
 
-        updateStats(); // updates stats immediately after
+        // updates stats immediately after
+        updateStats();
     };
 
     vetBtn.onclick = function() {
         if (money >= 20) {
             money -= 20;
             happiness = Math.min(100, health + 40);
-            cleanliness += 10;
+            
+            cleanliness = Math.min(100, cleanliness + 10);
             log("You visited the vet. - $20");
         } else {
             log("Not enough money for a vet visit");
 
         }
-
-        updateStats(); // updates stats immediately after
-    };
-
-    choresBtn.onclick = function() {
-        money += 10 ;
-        happiness += 3;
-        log("You did your chores. +$10");
-
-        updateStats(); // updates stats immediately after
+        // updates stats immediately after
+        updateStats();
     };
 
     let choresCooldown = false;
+    choresBtn.onclick = function() {
 
-    chores.Btn.onclick = function () {
-        if (choresCooldown) {
+        if (choresCooldown){
             log("Chores are on cooldown. Try again soon!");
             return;
         }
-
-        money += 10 ;
-        happiness += 3;
+        money += 10;
+        happiness = Math.min(100, happiness + 3);
         log("You did your chores. +$10");
 
-        updateStats(); // updates stats immediately after
-
+        updateStats();
+        
         choresCooldown = true;
-        choresBtn.disabled = true;
 
         let timeLeft = 60;
         choresBtn.textContent = `Chores (${timeLeft}s)`;
 
-        //countdown function which makes player wait until the next time they can earn money
         let timer = setInterval(() => {
-            timeLeft--;
-            choresBtn.textContent = `Choes (${timeLeft}s)`;
+            timeLeft --;
+            choresBtn.textContent = `Chores (${timeLeft}s)`;
 
-            if (timeLeft <= 0) {
+            if (timeLeft <= 0){
                 clearInterval(timer);
                 choresCooldown = false;
-                choresBtn.disabled = false;
                 choresBtn.textContent = "Chores (+$10)";
             }
         }, 1000);
+
     };
 
-    function saveGame(){
 
-    }
-    function applyLoadedState(s){
-    }
 });
+
+// shows error under input label in case of invalid inputs
+function showError(inputElement, errorElement, message){
+    inputElement.classList.add('error');
+    errorElement.textContent = message;
+    }
+
+// clears error once input is valid
+function clearError(inputElement, errorElement) {
+    inputElement.classList.remove('error');
+    errorElement.textContent = '';
+}
+
+function validateInputs() {
+
+    const userNameError = document.getElementById('userNameError');
+    const petNameError = document.getElementById('petNameError');
+    const petTypeError = document.getElementById('petTypeError');
+    const savingsGoalError = document.getElementById('savingsGoalError');
+    const goalVal = parseFloat(savingsGoal.value);
+
+    clearError(userName, userNameError);
+    clearError(petName, petNameError);
+    clearError(petType, petTypeError);
+    clearError(savingsGoal, savingsGoalError);
+
+    let isValid = true;
+
+    // username validation
+    const trimmedUserName = userName.value.trim();
+
+    if (trimmedUserName === ''){
+        showError(userName, userNameError, 'Name is required');
+        isValid = false;
+    } else if (trimmedUserName.length > 24) {
+        showError(userName, userNameError, 'Name must be 24 characters or less');
+        isValid = false;
+    }
+
+    // pet name validation
+
+    const trimmedPetName = petName.value.trim()
+
+    if (trimmedPetName === ''){
+        showError(petName, petNameError, 'Pet name is required');
+        isValid = false;
+    } else if (trimmedPetName.length > 24) {
+        showError(petName, petNameError, 'Pet name must be 24 characters or less');
+    }
+
+    // pet type validation
+
+    if (petType.value === '') {
+        showError(petType, petTypeError, 'Please select pet type');
+        isValid = false;
+    }
+    // goal validation
+
+    if (savingsGoal.value === '' || isNaN(goalVal)){
+        showError(savingsGoal, savingsGoalError, "Savings goal must be a number");
+        isValid = false;
+    } else if (goalVal < 1){
+        showError(savingsGoal, savingsGoalError, "Goal must be at least $1");
+        isValid = false;
+    } else if (goalVal > 500) {
+        showError(savingsGoal, savingsGoalError, "Goal must be less than or equal to $500");
+        isValid = false;
+    }
+    return isValid;
+
+}
+
+// pet reactions
+
+// gets pet reaction based on stats
+function getPetEmotion() {
+    if (health <= 30) {
+        return { emotion: 'sick', emoji: '🤒', status: 'Your pet is very sick!' };
+    }
+    if (hunger >= 80) {
+        return { emotion: 'hungry', emoji: '😫', status: 'Your pet is starving!' };
+    }
+    if (energy <= 20) {
+        return { emotion: 'tired', emoji: '😴', status: 'Your pet is exhausted.' };
+    }
+    if (happiness <= 40 || health <= 40) {
+        return { emotion: 'sad', emoji: '😢', status: 'Your pet is sad.' };
+    }
+    if (energy >= 85 && happiness >= 75) {
+        return { emotion: 'energetic', emoji: '🤩', status: 'Your pet is full of energy!' };
+    }
+    if (happiness >= 80 && energy >= 70 && hunger <= 30) {
+        return { emotion: 'happy', emoji: '😊', status: 'Your pet is very happy!' };
+    }
+    return { emotion: 'neutral', emoji: '🙂', status: 'Your pet is okay.' };
+}
+
+function updatePetReaction() {
+    const petEmojiEl = document.getElementById('petEmoji');
+    const emotionEmojiEl = document.getElementById('emotionEmoji');
+    const petStatusEl = document.getElementById('petStatus');
+    
+    const reaction = getPetEmotion();
+    
+    // Show pet type emoji (big)
+    petEmojiEl.textContent = petEmojis[petType.value] || '🐾';
+    // Show emotion emoji (smaller)
+    emotionEmojiEl.textContent = reaction.emoji;
+    // Show status
+    petStatusEl.textContent = reaction.status;
+    
+    // Apply background color
+    const petReactionDiv = document.getElementById('petReaction');
+    petReactionDiv.className = '';
+    petReactionDiv.classList.add(reaction.emotion);
+}
+
+
+// functions to update screen
+
+// updates stats, amount of money, and percent of money saved
+function updateStats() {
+    hungerStats.textContent = "Hunger: " + hunger + "%";
+    happinessStats.textContent = "Happiness: " + happiness + "%";
+    energyStats.textContent = "Energy: " + energy + "%";
+    cleanlinessStats.textContent = "Cleanliness: " + cleanliness + "%";
+    healthStats.textContent = "Health: " + health + "%";
+    ageStats.textContent = "Age: " + age + " years";
+    
+    
+    let percent = Math.floor((money / parseInt(savingsGoal.value)) * 100);
+    moneySaved.textContent = "Money saved: $" + money;
+    goal.textContent = "Goal: $" + savingsGoal.value + " (" + percent + "%)";
+    updatePetReaction();
+    saveGame();
+}
+
+// logs which action buttons were pressed
+function log(message) {
+    let entry = document.createElement("p");
+    entry.textContent = message;
+    logArea.appendChild(entry);
+    logArea.scrollTop = logArea.scrollHeight;
+}
+
+function loadGame() {
+    try {
+        const raw = localStorage.getItem('petGameState');
+        if (!raw) return null;
+        return JSON.parse(raw);
+    } catch (e) {
+        console.warn('Could not load game state:', e);
+        return null;
+    }
+}
+
+function saveGame(){
+
+    const gameState = {
+        userName: userName.value,
+        petName: petName.value,
+        petType: petType.value,
+        savingsGoal: savingsGoal.value,
+        money: money,
+        hunger: hunger,
+        happiness: happiness,
+        energy: energy,
+        cleanliness: cleanliness,
+        health: health,
+        age: age
+    }
+
+    try {
+        localStorage.setItem('petGameState', JSON.stringify(gameState));
+    } catch (e) {
+        console.warn("Could not save game state: ", e)
+    }
+}
+
+function applyLoadedState(s){
+    userName.value = s.userName || '';
+    petName.value = s.petName || '';
+    petType.value = s.petType || '';
+    savingsGoal.value = s.savingsGoal || '';
+
+    money = typeof s.money === 'number' ? s.money : 10;
+    hunger = typeof s.hunger === 'number' ? s.hunger : 0;
+    happiness = typeof s.happiness === 'number' ? s.happiness : 100;
+    energy = typeof s.energy === 'number' ? s.energy : 100;
+    cleanliness = typeof s.cleanliness === 'number' ? s.cleanliness : 100;
+    health = typeof s.health === 'number' ? s.health : 100;
+    age = typeof s.age === 'number' ? s.age : 0;
+}
