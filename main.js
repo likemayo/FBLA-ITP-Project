@@ -85,8 +85,8 @@ document.addEventListener("DOMContentLoaded", function(){
 
                 // display loaded state
 
-                userNameDisplay.textContent = "Hello, " + userName.value;
-                petNameDisplay.textContent = petName.value;
+                userNameDisplay.textContent = "Hello, " + (userName.value || '').trim();
+                petNameDisplay.textContent = (petName.value || '').trim();
 
                 updateStats();
             } else {
@@ -139,7 +139,7 @@ document.addEventListener("DOMContentLoaded", function(){
         updatePetReaction();
         saveGame();
 
-        const dayInterval = setInterval(applyPassiveDecay, 5000);
+        const decayInterval = setInterval(applyPassiveDecay, 5000);
 
         window.gameDecayInterval = decayInterval;
         }
@@ -447,7 +447,7 @@ function resetGame() {
     hunger = 0;
     happiness = 100;
     cleanliness = 100;
-    heatlh = 100;
+    health = 100;
     energy = 100;
     age = 0;
 
