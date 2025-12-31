@@ -49,6 +49,7 @@ let moneySaved = document.getElementById("moneySaved");
 let goal = document.getElementById("goal");
 let money = 10;
 
+
 // action button variables
 
 let feedBtn = document.getElementById("feedBtn");
@@ -63,41 +64,50 @@ let logArea = document.getElementById("logArea");
 // load DOM content first before running any onclick functions tot enure there's no issues
 
 document.addEventListener("DOMContentLoaded", function(){
-    const hasSavedGame = loadGame();
-
-    if (hasSavedGame) {
-        // ask user if they want to continue
-        const continueGame = confirm("Found a saved game! Continue where you left off?");
-
-        if (continueGame) {
-            // skip input screen, go straight to game
-            applyLoadedState(hasSavedGame);
-
-            play.classList.add("hide");
-            input.classList.add('hide');
-            game.classList.remove('hide');
-            game.classList.add("show");
-
-            // display loaded state
-
-            userNameDisplay.textContent = "Hello, " + userName.value;
-            petNameDisplay.textContent = petName.value;
-
-            updateStats();
-        } else {
-            // directs user to sign in section 
-            userName.value = '';
-            petName.value = '';
-            petType.value = '';
-            savingsGoal.value = '';
-        }
-    }
 
     // directs user to sign in section
     playButton.onclick = function(){
-        play.classList.add('hide');
-        input.classList.remove('hide');
-        input.classList.add('show');
+
+        const hasSavedGame = loadGame();
+
+        if (hasSavedGame) {
+            // ask user if they want to continue
+            const continueGame = confirm("Found a saved game! Continue where you left off?");
+
+            if (continueGame) {
+                // skip input screen, go straight to game
+                applyLoadedState(hasSavedGame);
+
+                play.classList.add("hide");
+                play.classList.remove('show');
+                input.classList.add('hide');
+                game.classList.add("show");
+
+                // display loaded state
+
+                userNameDisplay.textContent = "Hello, " + userName.value;
+                petNameDisplay.textContent = petName.value;
+
+                updateStats();
+            } else {
+                // directs user to sign in section 
+                userName.value = '';
+                petName.value = '';
+                petType.value = '';
+                savingsGoal.value = '';
+
+
+                play.classList.add('hide');
+                input.classList.remove('hide');
+                input.classList.add('show');
+            }
+        } else {
+            // if no saved game is found
+
+            play.classList.add("hide");
+            input.classList.remove('hide');
+            input.classList.add('show');
+        }
     }
 
     // submits username, pet name, etc.
@@ -128,7 +138,11 @@ document.addEventListener("DOMContentLoaded", function(){
 
         updatePetReaction();
         saveGame();
-    }
+
+        const dayInterval = setInterval(applyPassiveDecay, 5000);
+
+        window.gameDecayInterval = decayInterval;
+        }
 
     // action buttons
 
@@ -236,6 +250,8 @@ document.addEventListener("DOMContentLoaded", function(){
 
     };
 
+    const resetBtn = document.getElementById("resetBtn");
+    resetBtn.onclick = resetGame;
 
 });
 
@@ -286,6 +302,7 @@ function validateInputs() {
         isValid = false;
     } else if (trimmedPetName.length > 24) {
         showError(petName, petNameError, 'Pet name must be 24 characters or less');
+        isValid = true;
     }
 
     // pet type validation
@@ -383,6 +400,8 @@ function log(message) {
     logArea.scrollTop = logArea.scrollHeight;
 }
 
+// --------------------------------- persistence (local storage) ------------------
+
 function loadGame() {
     try {
         const raw = localStorage.getItem('petGameState');
@@ -417,6 +436,61 @@ function saveGame(){
     }
 }
 
+function resetGame() {
+    const sure = confirm("Are you sure you want to reset the game and delete saved progress?")
+
+    if (!sure) return;
+
+    try { localStorage.removeItem('petGameState'); } catch (_) {}
+
+    money = 10;
+    hunger = 0;
+    happiness = 100;
+    cleanliness = 100;
+    heatlh = 100;
+    energy = 100;
+    age = 0;
+
+    userName.value = '';
+    petName.value = '';
+    petType.value = '';
+    savingsGoal.value = '';
+
+    document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+    document.querySelectorAll('.error-msg').forEach(el => el.textContent = '');
+
+    if (logArea) logArea.innerHTML = '';
+    if (typeof choresBtn !== 'undefined' && choresBtn){
+        choresBtn.textContent = 'Chores (+$10)';
+    }
+
+    const petReactionDiv = document.getElementById('petReaction')
+
+    if (petReactionDiv) {
+        petReactionDiv.className = '';
+        const petEmojiEl = document.getElementById("petEmoji");
+        const emotionEmojiEl = document.getElementById("emotionEmoji");
+        const petTypeDisplay = document.getElementById("petTypeDisplay");
+        const petStatusEl = document.getElementById("petStatus");
+
+        if (petEmojiEl) petEmojiEl.textContent = '🐾';
+        if (emotionEmojiEl) emotionEmojiEl.textContent = '🙂';
+        if (petTypeDisplay) petTypeDisplay.textContent = '';
+        if (petStatusEl) petStatusEl.textContent = 'Your pet is okay.';
+    }
+
+    game.classList.remove('show');
+    game.classList.add('hide');
+    input.classList.add('hide');
+    input.classList.add('hide');
+    play.classList.remove('hide');
+
+    if (window.gameDecayInterval) {
+        clearInterval(window.gameDecayInterval);
+        window.gameDecayInterval = null;
+    }
+}
+
 function applyLoadedState(s){
     userName.value = s.userName || '';
     petName.value = s.petName || '';
@@ -430,4 +504,21 @@ function applyLoadedState(s){
     cleanliness = typeof s.cleanliness === 'number' ? s.cleanliness : 100;
     health = typeof s.health === 'number' ? s.health : 100;
     age = typeof s.age === 'number' ? s.age : 0;
+}
+
+function applyPassiveDecay() {
+
+    hunger = Math.min(100, hunger + 2);
+
+    energy = Math.max(0, energy - 1);
+
+    happiness = Math.max(0, happiness - 1);
+
+    cleanliness = Math.max(0, cleanliness - 0.5);
+
+    if (hunger >= 85 || energy <= 15 || happiness <= 20 || cleanliness <= 20) {
+        health = Math.max(0, health - 3);
+    }
+
+    updateStats();
 }

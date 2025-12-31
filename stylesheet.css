@@ -173,6 +173,22 @@ h1{
     border-radius:6px;
 }
 
+#resetBtn {
+    background-color: #ff6b6b;
+    color: white;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s ease, background-color 0.2s ease;
+    margin: 8px 0;
+}
+
+#resetBtn:hover {
+    background-color: #ff5252;
+    transform: translateY(-1px);
+}
 /*------------------------------------ PET REACTIONS ----------------------------------*/
 
 /* Pet reaction container */
