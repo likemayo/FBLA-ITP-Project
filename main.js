@@ -162,6 +162,7 @@ document.addEventListener("DOMContentLoaded", function(){
         if (money >= 5) {
             money -= 5;
             hunger = Math.max(0, hunger - 20);
+            expenses.food += 5;
             happiness += 5;
             log("You fed your pet. -$5");
         } else {
@@ -179,6 +180,7 @@ document.addEventListener("DOMContentLoaded", function(){
             money -= 2;
             happiness += 15;
             energy -= 10;
+            expenses.entertainment += 2;
             log("You played with your pet. -$2");
         } else {
             log("Not enough money to play.");
@@ -202,6 +204,7 @@ document.addEventListener("DOMContentLoaded", function(){
             money -= 2;
 
             health = Math.min(100, health + 3);
+            expenses.hygiene += 2;
 
             cleanliness = Math.min(100, cleanliness + 5);
 
@@ -218,6 +221,7 @@ document.addEventListener("DOMContentLoaded", function(){
         if (money >= 20) {
             money -= 20;
             happiness = Math.min(100, health + 40);
+            expenses.healthcare += 20;
             
             cleanliness = Math.min(100, cleanliness + 10);
             log("You visited the vet. - $20");

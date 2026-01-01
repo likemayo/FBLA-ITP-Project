@@ -173,7 +173,7 @@ h1{
     border-radius:6px;
 }
 
-#resetBtn {
+#resetBtn, #viewReportBtn, #backToGameBtn {
     background-color: #ff6b6b;
     color: white;
     padding: 8px 14px;
@@ -185,7 +185,7 @@ h1{
     margin: 8px 0;
 }
 
-#resetBtn:hover {
+#resetBtn:hover, #backToGameBtn, #viewReportBtn {
     background-color: #ff5252;
     transform: translateY(-1px);
 }
@@ -193,8 +193,6 @@ h1{
 #backToGameBtn, #viewReportBtn {
     background-color: #0b2538;
     color: white;
-    padding: 8px 14px;
-    margin: 5px;
 }
 
 #backToGameBtn:hover, #viewReportBtn:hover {
