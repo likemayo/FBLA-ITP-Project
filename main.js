@@ -61,6 +61,16 @@ let choresBtn = document.getElementById("choresBtn");
 
 let logArea = document.getElementById("logArea");
 
+// budget report section
+
+let expenses = {
+    food: 0,
+    entertainment: 0,
+    hyiene: 0,
+    healthcare: 0
+
+}
+
 // load DOM content first before running any onclick functions tot enure there's no issues
 
 document.addEventListener("DOMContentLoaded", function(){
@@ -253,8 +263,22 @@ document.addEventListener("DOMContentLoaded", function(){
     const resetBtn = document.getElementById("resetBtn");
     resetBtn.onclick = resetGame;
 
+    const viewReportBtn = document.getElementById('viewReportBtn');
+    const backToGmeBtn = document.getElementById('backToGameBtn');
+    const report = document.getElementById('report');
+
+    if (viewReportBtn) {
+        viewReportBtn.onclick = showReport;
+
+    }
+
+    if (backToGameBtn) {
+        backToGameBtn.onclick = hideReport;
+    }
+
 });
 
+// ----------------------------------------- ERROR FUNCTIONS ----------------------
 // shows error under input label in case of invalid inputs
 function showError(inputElement, errorElement, message){
     inputElement.classList.add('error');
@@ -266,6 +290,8 @@ function clearError(inputElement, errorElement) {
     inputElement.classList.remove('error');
     errorElement.textContent = '';
 }
+
+// ------------------------------------- VALIDATE INPUTS -------------------------
 
 function validateInputs() {
 
@@ -327,7 +353,7 @@ function validateInputs() {
 
 }
 
-// pet reactions
+// ------------------------------------- PET REACTIONS ----------------------------
 
 // gets pet reaction based on stats
 function getPetEmotion() {
@@ -373,7 +399,7 @@ function updatePetReaction() {
 }
 
 
-// functions to update screen
+// --------------------------------- UPDATING STATS ---------------------------------
 
 // updates stats, amount of money, and percent of money saved
 function updateStats() {
@@ -400,7 +426,24 @@ function log(message) {
     logArea.scrollTop = logArea.scrollHeight;
 }
 
-// --------------------------------- persistence (local storage) ------------------
+function applyPassiveDecay() {
+
+    hunger = Math.min(100, hunger + 2);
+
+    energy = Math.max(0, energy - 1);
+
+    happiness = Math.max(0, happiness - 1);
+
+    cleanliness = Math.max(0, cleanliness - 0.5);
+
+    if (hunger >= 85 || energy <= 15 || happiness <= 20 || cleanliness <= 20) {
+        health = Math.max(0, health - 3);
+    }
+
+    updateStats();
+}
+
+// ------------------------------------- PERSISTENCE (LOCAL STORAGE) -----------------------
 
 function loadGame() {
     try {
@@ -412,6 +455,7 @@ function loadGame() {
         return null;
     }
 }
+
 
 function saveGame(){
 
@@ -426,7 +470,8 @@ function saveGame(){
         energy: energy,
         cleanliness: cleanliness,
         health: health,
-        age: age
+        age: age,
+        expenses: expenses
     }
 
     try {
@@ -450,6 +495,13 @@ function resetGame() {
     health = 100;
     energy = 100;
     age = 0;
+
+    expenses = {
+        food: 0,
+        healthcare: 0,
+        hygiene: 0,
+        entertainment: 0
+    }
 
     userName.value = '';
     petName.value = '';
@@ -504,21 +556,53 @@ function applyLoadedState(s){
     cleanliness = typeof s.cleanliness === 'number' ? s.cleanliness : 100;
     health = typeof s.health === 'number' ? s.health : 100;
     age = typeof s.age === 'number' ? s.age : 0;
+
+    if (s.expenses) {
+        expenses.food = s.expenses.food || 0;
+        expenses.healthcare = s.expenses.healthcare || 0;
+        expenses.hygiene = s.expenses.hygiene || 0;
+        expenses.entertainment = s.expenses.entertainment || 0;
+    }
 }
 
-function applyPassiveDecay() {
+// ---------------------------------- BUDGET REPORT FUNCTIONS -----------------------------------------
 
-    hunger = Math.min(100, hunger + 2);
+function updateBudgetReport() {
+    const totalSpent = expenses.food + expenses.healthcare + expenses.hygiene + expenses.entertainment;
+    const totalEarned = (money + totalSpent) - 10;
+    
+    document.getElementById('totalSpent').textContent = `Total Spent: $${totalSpent}`;
+    document.getElementById('earnedAmount').textContent = totalEarned;
+    
+    updateCategoryDisplay('food', expenses.food, totalSpent);
+    updateCategoryDisplay('healthcare', expenses.healthcare, totalSpent);
+    updateCategoryDisplay('hygiene', expenses.hygiene, totalSpent);
+    updateCategoryDisplay('entertainment', expenses.entertainment, totalSpent);
+}
 
-    energy = Math.max(0, energy - 1);
+function updateCategoryDisplay(category, amount, total) {
+    const percent = total > 0 ? Math.round((amount / total) * 100) : 0;
+    document.getElementById(`${category}Amount`).textContent = `$${amount}`;
+    document.getElementById(`${category}Percent`).textContent = percent;
+    document.getElementById(`${category}Bar`).style.width = `${percent}%`;
+}
 
-    happiness = Math.max(0, happiness - 1);
+function showReport() {
+    updateBudgetReport();
+    const report = document.getElementById("report");
 
-    cleanliness = Math.max(0, cleanliness - 0.5);
+    game.classList.remove("show");
+    game.classList.add("hide");
+    report.classList.add("show");
+    report.classList.remove("hide");
 
-    if (hunger >= 85 || energy <= 15 || happiness <= 20 || cleanliness <= 20) {
-        health = Math.max(0, health - 3);
-    }
+}
 
-    updateStats();
+function hideReport() {
+    const report = document.getElementById("report");
+
+    game.classList.add("show");
+    game.classList.remove("hide");
+    report.classList.remove("show");
+    report.classList.add("hide");
 }
