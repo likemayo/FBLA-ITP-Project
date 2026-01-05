@@ -7,17 +7,21 @@ cambridge blue: #94c7b4
 light blue: #daf5ff
 
 ----------- GENERAL DOCUMENT STYLING -----------*/
+
+/* applies parkinsans font, font weight, and font color to everything */
 *{
     font-family: "Parkinsans", sans-serif;
     font-weight: 450;
     color: #030d14;
 }
 
+/* applies background color and sets height */
 body {
     background-color: aliceblue;
     height: 100vh;
 }
 
+/* standardizes how button, input, and select tags look */
 button, input, select{
     background-color: white;
     border: 1px, solid, #0b2538;
@@ -39,6 +43,7 @@ input::placeholder{
     color:rgb(196, 214, 229);
 }
 
+/* hide and show classes to give the effect of switching pages while keeping everything in one single html document */
 .hide {
     display: none;
 }
@@ -46,6 +51,8 @@ input::placeholder{
 .show {
     display: inline;
 }
+
+/* applies error message styling when someone incorrectly fills out input */
 
 .error {
     border: 1px solid #d33;

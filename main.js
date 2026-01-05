@@ -190,6 +190,7 @@ document.addEventListener("DOMContentLoaded", function(){
         updateStats();
     }
 
+    // allows pet to rest and raise energy
     restBtn.onclick = function() {
         energy = Math.min(100, energy + 20);
         happiness -= 5;
@@ -198,6 +199,8 @@ document.addEventListener("DOMContentLoaded", function(){
         // updates stats immediately after
         updateStats();
     }
+
+    // cleans pet
 
     cleanBtn.onclick = function() {
         if (money >= 2) {
@@ -217,6 +220,7 @@ document.addEventListener("DOMContentLoaded", function(){
         updateStats();
     };
 
+    // heals pet by 20%, but also costs lots of money
     vetBtn.onclick = function() {
         if (money >= 20) {
             money -= 20;
@@ -233,6 +237,7 @@ document.addEventListener("DOMContentLoaded", function(){
         updateStats();
     };
 
+    // cooldown after earning $10 from doing chores
     let choresCooldown = false;
     choresBtn.onclick = function() {
 
@@ -268,7 +273,7 @@ document.addEventListener("DOMContentLoaded", function(){
     resetBtn.onclick = resetGame;
 
     const viewReportBtn = document.getElementById('viewReportBtn');
-    const backToGmeBtn = document.getElementById('backToGameBtn');
+    const backToGameBtn = document.getElementById('backToGameBtn');
     const report = document.getElementById('report');
 
     if (viewReportBtn) {
@@ -297,6 +302,7 @@ function clearError(inputElement, errorElement) {
 
 // ------------------------------------- VALIDATE INPUTS -------------------------
 
+// makes sure that the inputs are valid before allowing the user to proceed
 function validateInputs() {
 
     const userNameError = document.getElementById('userNameError');
@@ -382,6 +388,7 @@ function getPetEmotion() {
     return { emotion: 'neutral', emoji: '🙂', status: 'Your pet is okay.' };
 }
 
+// updates pet reaction (similar to update stats, called in update stats)
 function updatePetReaction() {
     const petEmojiEl = document.getElementById('petEmoji');
     const emotionEmojiEl = document.getElementById('emotionEmoji');
@@ -422,7 +429,7 @@ function updateStats() {
     saveGame();
 }
 
-// logs which action buttons were pressed
+// logs which action buttons were pressed and displays it for user
 function log(message) {
     let entry = document.createElement("p");
     entry.textContent = message;
@@ -430,6 +437,7 @@ function log(message) {
     logArea.scrollTop = logArea.scrollHeight;
 }
 
+// reduces/increases certain stats based on time elapsed
 function applyPassiveDecay() {
 
     hunger = Math.min(100, hunger + 2);
@@ -449,6 +457,7 @@ function applyPassiveDecay() {
 
 // ------------------------------------- PERSISTENCE (LOCAL STORAGE) -----------------------
 
+// loads game based on data locally saved from previous visits the user has made to the app
 function loadGame() {
     try {
         const raw = localStorage.getItem('petGameState');
@@ -461,6 +470,7 @@ function loadGame() {
 }
 
 
+// saves the stats/data of the user in a dictionary and compresses it into a string before the user leaves the page
 function saveGame(){
 
     const gameState = {
@@ -485,6 +495,7 @@ function saveGame(){
     }
 }
 
+// deletes any saved data in case user wants a fresh start
 function resetGame() {
     const sure = confirm("Are you sure you want to reset the game and delete saved progress?")
 
@@ -547,6 +558,7 @@ function resetGame() {
     }
 }
 
+// loads the data of the user (called if the user tries to proceed to sign in screen with another game saved)
 function applyLoadedState(s){
     userName.value = s.userName || '';
     petName.value = s.petName || '';
@@ -564,13 +576,14 @@ function applyLoadedState(s){
     if (s.expenses) {
         expenses.food = s.expenses.food || 0;
         expenses.healthcare = s.expenses.healthcare || 0;
-        expenses.hygiene = s.expenses.hygiene || 0;
+        expenses.hygeine = s.expenses.hygiene || 0;
         expenses.entertainment = s.expenses.entertainment || 0;
     }
 }
 
 // ---------------------------------- BUDGET REPORT FUNCTIONS -----------------------------------------
 
+// creates a budget report for user based on game play
 function updateBudgetReport() {
     const totalSpent = expenses.food + expenses.healthcare + expenses.hygiene + expenses.entertainment;
     const totalEarned = (money + totalSpent) - 10;
@@ -583,7 +596,6 @@ function updateBudgetReport() {
     updateCategoryDisplay('hygiene', expenses.hygiene, totalSpent);
     updateCategoryDisplay('entertainment', expenses.entertainment, totalSpent);
 }
-
 function updateCategoryDisplay(category, amount, total) {
     const percent = total > 0 ? Math.round((amount / total) * 100) : 0;
     document.getElementById(`${category}Amount`).textContent = `$${amount}`;
@@ -591,6 +603,8 @@ function updateCategoryDisplay(category, amount, total) {
     document.getElementById(`${category}Bar`).style.width = `${percent}%`;
 }
 
+
+// shows report and hides game
 function showReport() {
     updateBudgetReport();
     const report = document.getElementById("report");
@@ -602,6 +616,7 @@ function showReport() {
 
 }
 
+// hides report and returns back to game
 function hideReport() {
     const report = document.getElementById("report");
 
