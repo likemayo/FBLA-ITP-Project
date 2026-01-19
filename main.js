@@ -154,7 +154,7 @@ let decayInterval;
 document.addEventListener("DOMContentLoaded", function(){
     setTimeout(delayBackgroundImage, 1000);
     setTimeout(delayPlayButton, 2000);
-    decayInterval = setInterval(applyPassiveDecay, 5000);
+    // Decay interval will be started when a game begins
     // directs user to sign in section
     playButton.onclick = function(){
 
@@ -180,7 +180,12 @@ document.addEventListener("DOMContentLoaded", function(){
                 updateStats();
                 updatePetReaction();
 
-                window.gameDecayInterval = decayInterval;
+                // Clear any existing interval and start fresh for this game session
+                if (window.gameDecayInterval) {
+                    clearInterval(window.gameDecayInterval);
+                }
+                window.gameDecayInterval = setInterval(applyPassiveDecay, 5000);
+                console.log("Started decay interval for loaded game");
             } else {
                 // directs user to sign in section 
                 userName.value = '';
@@ -236,7 +241,12 @@ document.addEventListener("DOMContentLoaded", function(){
         updatePetReaction();
         saveGame();
 
-        window.gameDecayInterval = decayInterval;
+        // Clear any existing interval and start fresh for this game session
+        if (window.gameDecayInterval) {
+            clearInterval(window.gameDecayInterval);
+        }
+        window.gameDecayInterval = setInterval(applyPassiveDecay, 5000);
+        console.log("Started decay interval");
         }
 
     // action buttons
@@ -539,6 +549,11 @@ function updateStats() {
     moneySaved.textContent = "Money saved: $" + money;
     goal.textContent = "Goal: $" + savingsGoal.value + " (" + percent + "%)";
     updatePetReaction();
+    
+    // Ensure pet info is always saved
+    if (petName.value) currentPetName = petName.value;
+    if (petType.value) currentPetType = petType.value;
+    
     saveGame();
 
     checkLifeStageMilestone();
@@ -555,16 +570,18 @@ function log(message) {
 // reduces/increases certain stats based on time elapse
 
 function applyPassiveDecay() {
+    console.log("applyPassiveDecay called - Current age:", age);
     hunger = Math.min(100, hunger + 2);
     energy = Math.max(0, energy - 1);
     happiness = Math.max(0, happiness - 1);
     cleanliness = Math.max(0, cleanliness - 0.5);
     age += 1;
+    
+    console.log("After decay - age:", age, "hunger:", hunger, "energy:", energy);
 
     if (hunger >= 85 || energy <= 15 || happiness <= 20 || cleanliness <= 20) {
         health = Math.max(0, health - 3);
     }
-
 
     updateStats();
 }
@@ -575,8 +592,14 @@ function applyPassiveDecay() {
 function loadGame() {
     try {
         const raw = localStorage.getItem('petGameState');
-        if (!raw) return null;
-        return JSON.parse(raw);
+        if (!raw) {
+            console.log("No saved game found in localStorage");
+            return null;
+        }
+        const parsed = JSON.parse(raw);
+        console.log("Loaded game state:", parsed);
+        console.log("Loaded petName:", parsed.petName, "petType:", parsed.petType);
+        return parsed;
     } catch (e) {
         console.warn('Could not load game state:', e);
         return null;
@@ -586,6 +609,11 @@ function loadGame() {
 
 // saves the stats/data of the user in a dictionary and compresses it into a string before the user leaves the page
 function saveGame(){
+    // Don't save if we're still on the initial screen (no pet info set yet)
+    if (!currentPetName && !petName.value) {
+        console.log("Skipping save - no pet name set yet");
+        return;
+    }
 
     const gameState = {
         userName: userName.value,
@@ -603,8 +631,12 @@ function saveGame(){
         expenses: expenses
     }
 
+    console.log("saveGame() - petName.value:", petName.value, "currentPetName:", currentPetName, "saving as:", gameState.petName);
+    console.log("saveGame() - petType.value:", petType.value, "currentPetType:", currentPetType, "saving as:", gameState.petType);
+
     try {
         localStorage.setItem('petGameState', JSON.stringify(gameState));
+        console.log("Game state saved successfully");
     } catch (e) {
         console.warn("Could not save game state: ", e)
     }
