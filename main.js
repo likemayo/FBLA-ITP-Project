@@ -172,6 +172,9 @@ document.addEventListener("DOMContentLoaded", function(){
                 petNameDisplay.textContent = (petName.value || '').trim();
 
                 updateStats();
+
+                const decayInterval = setInterval(applyPassiveDecay, 5000);
+                window.gameDecayInterval = decayInterval;
             } else {
                 // directs user to sign in section 
                 userName.value = '';
