@@ -301,7 +301,7 @@ document.addEventListener("DOMContentLoaded", function(){
     vetBtn.onclick = function() {
         if (money >= 20) {
             money -= 20;
-            happiness = Math.min(100, health + 40);
+            health = Math.min(100, health + 40);
             expenses.healthcare += 20;
             
             cleanliness = Math.min(100, cleanliness + 10);
@@ -324,10 +324,9 @@ document.addEventListener("DOMContentLoaded", function(){
         }
 
         money += 10 ;
-        happiness += 3;
-        log("You did your chores. +$10");
+        happiness = Math.min(100, happiness + 3);
+        log("You did your chores! +$10");
 
-        updateStats(); // updates stats immediately after
 
         choresCooldown = true;
 
@@ -345,6 +344,7 @@ document.addEventListener("DOMContentLoaded", function(){
                 choresBtn.textContent = "Chores (+$10)";
             }
         }, 1000);
+        updateStats(); // updates stats immediately after
     };
     const resetBtn = document.getElementById("resetBtn");
     resetBtn.onclick = resetGame;
