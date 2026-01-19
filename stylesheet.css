@@ -19,6 +19,7 @@ light blue: #daf5ff
 body {
     background-color: aliceblue;
     height: 100vh;
+    margin: 0;
 }
 
 /* standardizes how button, input, and select tags look */
@@ -70,15 +71,37 @@ h1{
     text-align: center;
 }
 
+#play{
+    background-color: #8c6959;
+    height: 100%;
+}
+
 #playButton {
     position: absolute;
     left: 50%;
-    top: 30%;
+    top: 75%;
     transform: translate(-50%, -50%);
-    font-size: 25px;
+    font-size: 45px;
+    border-radius: 15px;
+    background-color: #ebdad1;
+    color: #8c6959;
+    border: solid 3px #d2a28c;
+    transition: 0.3s;
 }
-#play button:hover{
-    font-size: 30px;
+#playButton:hover{
+    background-color: #d0bab1;
+}
+
+#backgroundImage {
+    width: 100%;
+    margin: 0;
+    transition: 0.3s;
+    max-height: 99vh;
+}
+
+#playButton, #backgroundImage{
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out;
 }
 
 /*----------------------------------------------------- USER INPUT -------------------------------------------*/

@@ -2,6 +2,7 @@
 
 let play = document.getElementById("play");
 let playButton = document.getElementById("playButton");
+let background = document.getElementById("backgroundImage");
 
 
 // input section variables
@@ -74,7 +75,8 @@ let expenses = {
 // load DOM content first before running any onclick functions tot enure there's no issues
 
 document.addEventListener("DOMContentLoaded", function(){
-
+    setTimeout(delayBackgroundImage, 3000);
+    setTimeout(delayPlayButton, 6000);  
     // directs user to sign in section
     playButton.onclick = function(){
 
@@ -287,6 +289,21 @@ document.addEventListener("DOMContentLoaded", function(){
 
 });
 
+// ----------------------------------------- DELAYING PLAY SCREEN ----------------------
+function delayBackgroundImage(){
+    background.style.display = "block";
+
+    setTimeout(() => {
+        background.style.opacity = "1";
+    }, 150); // allows for the background image to fade into view
+}
+function delayPlayButton(){
+    playButton.style.display = 'block';
+
+    setTimeout(() => {
+        playButton.style.opacity = "1";
+    }, 150); // allows for play button to fade into view shortly after
+}
 // ----------------------------------------- ERROR FUNCTIONS ----------------------
 // shows error under input label in case of invalid inputs
 function showError(inputElement, errorElement, message){
