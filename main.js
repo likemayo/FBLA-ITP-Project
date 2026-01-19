@@ -138,7 +138,7 @@ let logArea = document.getElementById("logArea");
 let expenses = {
     food: 0,
     entertainment: 0,
-    hyiene: 0,
+    hygiene: 0,
     healthcare: 0
 
 }
@@ -670,7 +670,7 @@ function applyLoadedState(s){
     if (s.expenses) {
         expenses.food = s.expenses.food || 0;
         expenses.healthcare = s.expenses.healthcare || 0;
-        expenses.hygeine = s.expenses.hygiene || 0;
+        expenses.hygiene = s.expenses.hygiene || 0;
         expenses.entertainment = s.expenses.entertainment || 0;
     }
 }
