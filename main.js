@@ -52,13 +52,13 @@ const petLifeStages = {
     senior: { min: 20, max: 100, label: 'Senior' }
 };
 
-function getPetLifeStage() {
-    for (const [key, stage] of Object.entries(petLifeStages)) {
-        if (age >= stage.min && age <= stage.max) {
-            return stage;
-        }
-    }
-    return petLifeStages.adult;
+function getPetStageEmoji() {
+    const currentStage = getPetLifeStage();
+    const petTypeVal = petType.value;
+    
+    const emoji = petStageEmojis[petTypeVal] && petStageEmojis[petTypeVal][currentStage.label];
+    
+    return emoji || '🐾';
 }
 
 const petStageEmojis = {
@@ -200,6 +200,7 @@ document.addEventListener("DOMContentLoaded", function(){
     submitInputs.onclick = function() {
 
         if (!validateInputs()) {
+            showError(petType, petTypeError, "Enter")
             return;
         }
         
@@ -315,36 +316,38 @@ document.addEventListener("DOMContentLoaded", function(){
 
     // cooldown after earning $10 from doing chores
     let choresCooldown = false;
-    choresBtn.onclick = function() {
 
-        if (choresCooldown){
+    choresBtn.onclick = function () {
+        if (choresCooldown) {
             log("Chores are on cooldown. Try again soon!");
             return;
         }
-        money += 10;
-        happiness = Math.min(100, happiness + 3);
+
+        money += 10 ;
+        happiness += 3;
         log("You did your chores. +$10");
 
-        updateStats();
-        
+        updateStats(); // updates stats immediately after
+
         choresCooldown = true;
+        choresBtn.disabled = true;
 
         let timeLeft = 60;
         choresBtn.textContent = `Chores (${timeLeft}s)`;
 
+        //countdown function which makes player wait until the next time they can earn money
         let timer = setInterval(() => {
-            timeLeft --;
-            choresBtn.textContent = `Chores (${timeLeft}s)`;
+            timeLeft--;
+            choresBtn.textContent = `Choes (${timeLeft}s)`;
 
-            if (timeLeft <= 0){
+            if (timeLeft <= 0) {
                 clearInterval(timer);
                 choresCooldown = false;
+                choresBtn.disabled = false;
                 choresBtn.textContent = "Chores (+$10)";
             }
         }, 1000);
-
     };
-
     const resetBtn = document.getElementById("resetBtn");
     resetBtn.onclick = resetGame;
 
