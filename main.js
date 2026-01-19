@@ -36,6 +36,10 @@ let health = 100;
 let ageStats = document.getElementById("ageStats");
 let age = 0;
 
+// Game state variables
+let currentPetName = '';
+let currentPetType = '';
+
 // --------------------------------------------- pet life stages ------------------------------------------
 const petEmojis = {
     'Dog': '🐕',
@@ -145,10 +149,12 @@ let expenses = {
 
 // load DOM content first before running any onclick functions tot enure there's no issues
 
+let decayInterval;
+
 document.addEventListener("DOMContentLoaded", function(){
     setTimeout(delayBackgroundImage, 1000);
     setTimeout(delayPlayButton, 2000);
-    setInterval(applyPassiveDecay, 5000);
+    decayInterval = setInterval(applyPassiveDecay, 5000);
     // directs user to sign in section
     playButton.onclick = function(){
 
@@ -170,8 +176,7 @@ document.addEventListener("DOMContentLoaded", function(){
                 // display loaded state
 
                 userNameDisplay.textContent = "Hello, " + (userName.value || '').trim();
-                petNameDisplay.textContent = (petName.value || '').trim();
-
+                
                 updateStats();
                 updatePetReaction();
 
@@ -207,6 +212,10 @@ document.addEventListener("DOMContentLoaded", function(){
         
         userNameDisplay.textContent = "Hello, " + userName.value;
         petNameDisplay.textContent = petName.value;
+        
+        // Store pet info in game variables
+        currentPetName = petName.value;
+        currentPetType = petType.value;
 
         let percent = money / parseInt(savingsGoal.value) * 100;
 
@@ -499,10 +508,13 @@ function updatePetReaction() {
     
     // Display pet name and type
     if (petNameDisplay) {
-        petNameDisplay.textContent = petName.value;
+        const nameToDisplay = petName.value || currentPetName;
+        petNameDisplay.textContent = nameToDisplay;
     }
     if (petTypeDisplay) {
-        petTypeDisplay.textContent = petType.value + " (" + lifeStage.label + ")";
+        const typeToDisplay = petType.value || currentPetType;
+        const displayText = typeToDisplay + " (" + lifeStage.label + ")";
+        petTypeDisplay.textContent = displayText;
     }
     petStatusEl.textContent = reaction.status;
 
@@ -577,8 +589,8 @@ function saveGame(){
 
     const gameState = {
         userName: userName.value,
-        petName: petName.value,
-        petType: petType.value,
+        petName: petName.value || currentPetName,
+        petType: petType.value || currentPetType,
         savingsGoal: savingsGoal.value,
         money: money,
         hunger: hunger,
@@ -604,7 +616,10 @@ function resetGame() {
 
     if (!sure) return;
 
-    try { localStorage.removeItem('petGameState'); } catch (_) {}
+    try { 
+        localStorage.removeItem('petGameState');
+        console.log('Game saved state cleared');
+    } catch (_) {}
 
     money = 10;
     hunger = 0;
@@ -642,11 +657,13 @@ function resetGame() {
         const petEmojiEl = document.getElementById("petEmoji");
         const emotionEmojiEl = document.getElementById("emotionEmoji");
         const petTypeDisplay = document.getElementById("petTypeDisplay");
+        const petNameDisplay = document.getElementById("petNameDisplay");
         const petStatusEl = document.getElementById("petStatus");
 
         if (petEmojiEl) petEmojiEl.textContent = '🐾';
         if (emotionEmojiEl) emotionEmojiEl.textContent = '🙂';
         if (petTypeDisplay) petTypeDisplay.textContent = '';
+        if (petNameDisplay) petNameDisplay.textContent = '';
         if (petStatusEl) petStatusEl.textContent = 'Your pet is okay.';
     }
 
@@ -668,6 +685,10 @@ function applyLoadedState(s){
     petName.value = s.petName || '';
     petType.value = s.petType || '';
     savingsGoal.value = s.savingsGoal || '';
+    
+    // Store pet info in game variables
+    currentPetName = s.petName || '';
+    currentPetType = s.petType || '';
 
     money = typeof s.money === 'number' ? s.money : 10;
     hunger = typeof s.hunger === 'number' ? s.hunger : 0;
