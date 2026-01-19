@@ -52,11 +52,20 @@ const petLifeStages = {
     senior: { min: 20, max: 100, label: 'Senior' }
 };
 
+function getPetLifeStage() {
+    for (const [key, stage] of Object.entries(petLifeStages)) {
+        if (age >= stage.min && age <= stage.max) {
+            return stage;
+        }
+    }
+    return petLifeStages.adult;
+}
+
 function getPetStageEmoji() {
     const currentStage = getPetLifeStage();
-    const petTypeVal = petType.value;
+    const petTypeVal = petType && petType.value ? petType.value : 'Dog';
     
-    const emoji = petStageEmojis[petTypeVal] && petStageEmojis[petTypeVal][currentStage.label];
+    const emoji = petStageEmojis[petType] && petStageEmojis[petType][currentStage.label];
     
     return emoji || '🐾';
 }
