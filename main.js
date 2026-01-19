@@ -65,7 +65,7 @@ function getPetStageEmoji() {
     const currentStage = getPetLifeStage();
     const petTypeVal = petType && petType.value ? petType.value : 'Dog';
     
-    const emoji = petStageEmojis[petType] && petStageEmojis[petType][currentStage.label];
+    const emoji = petStageEmojis[petTypeVal] && petStageEmojis[petTypeVal][currentStage.label];
     
     return emoji || '🐾';
 }
@@ -104,15 +104,6 @@ const petStageEmojis = {
 };
 
 let lastLoggedStage = "Baby";
-
-function getPetStageEmoji() {
-    const currentStage = getPetLifeStage();
-    const petType = petType.value;
-    
-    const emoji = petStageEmojis[petType] && petStageEmojis[petType][currentStage.label];
-    
-    return emoji || '🐾';
-}
 
 function checkLifeStageMilestone() {
     const currentStage = getPetLifeStage();
@@ -155,8 +146,8 @@ let expenses = {
 // load DOM content first before running any onclick functions tot enure there's no issues
 
 document.addEventListener("DOMContentLoaded", function(){
-    setTimeout(delayBackgroundImage, 3000);
-    setTimeout(delayPlayButton, 6000);
+    setTimeout(delayBackgroundImage, 1000);
+    setTimeout(delayPlayButton, 2000);
     setInterval(applyPassiveDecay, 5000);
     // directs user to sign in section
     playButton.onclick = function(){
@@ -182,6 +173,7 @@ document.addEventListener("DOMContentLoaded", function(){
                 petNameDisplay.textContent = (petName.value || '').trim();
 
                 updateStats();
+                updatePetReaction();
 
                 window.gameDecayInterval = decayInterval;
             } else {
@@ -493,6 +485,7 @@ function updatePetReaction() {
     const petEmojiEl = document.getElementById('petEmoji');
     const emotionEmojiEl = document.getElementById('emotionEmoji');
     const petTypeDisplay = document.getElementById('petTypeDisplay');
+    const petNameDisplay = document.getElementById('petNameDisplay');
     const petStatusEl = document.getElementById('petStatus');
 
     if (!petReactionDiv) return;
@@ -504,7 +497,13 @@ function updatePetReaction() {
     petEmojiEl.textContent = getPetStageEmoji();
     emotionEmojiEl.textContent = reaction.emoji;
     
-    petTypeDisplay.textContent = `${petType.value} (${lifeStage.label})`;
+    // Display pet name and type
+    if (petNameDisplay) {
+        petNameDisplay.textContent = petName.value;
+    }
+    if (petTypeDisplay) {
+        petTypeDisplay.textContent = petType.value + " (" + lifeStage.label + ")";
+    }
     petStatusEl.textContent = reaction.status;
 
     petReactionDiv.className = '';
