@@ -513,7 +513,7 @@ function updateStats() {
     energyStats.textContent = "Energy: " + energy + "%";
     cleanlinessStats.textContent = "Cleanliness: " + cleanliness + "%";
     healthStats.textContent = "Health: " + health + "%";
-    ageStats.textContent = "Age: " + age + " years";
+    ageStats.textContent = "Age: " + age + " days";
     
     
     let percent = Math.floor((money / parseInt(savingsGoal.value)) * 100);
