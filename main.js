@@ -330,7 +330,6 @@ document.addEventListener("DOMContentLoaded", function(){
         updateStats(); // updates stats immediately after
 
         choresCooldown = true;
-        choresBtn.disabled = true;
 
         let timeLeft = 60;
         choresBtn.textContent = `Chores (${timeLeft}s)`;
@@ -338,12 +337,11 @@ document.addEventListener("DOMContentLoaded", function(){
         //countdown function which makes player wait until the next time they can earn money
         let timer = setInterval(() => {
             timeLeft--;
-            choresBtn.textContent = `Choes (${timeLeft}s)`;
+            choresBtn.textContent = `Chores (${timeLeft}s)`;
 
             if (timeLeft <= 0) {
                 clearInterval(timer);
                 choresCooldown = false;
-                choresBtn.disabled = false;
                 choresBtn.textContent = "Chores (+$10)";
             }
         }, 1000);
