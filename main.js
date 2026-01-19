@@ -147,7 +147,8 @@ let expenses = {
 
 document.addEventListener("DOMContentLoaded", function(){
     setTimeout(delayBackgroundImage, 3000);
-    setTimeout(delayPlayButton, 6000);  
+    setTimeout(delayPlayButton, 6000);
+    setInterval(applyPassiveDecay, 5000);
     // directs user to sign in section
     playButton.onclick = function(){
 
@@ -173,7 +174,6 @@ document.addEventListener("DOMContentLoaded", function(){
 
                 updateStats();
 
-                const decayInterval = setInterval(applyPassiveDecay, 5000);
                 window.gameDecayInterval = decayInterval;
             } else {
                 // directs user to sign in section 
@@ -225,8 +225,6 @@ document.addEventListener("DOMContentLoaded", function(){
 
         updatePetReaction();
         saveGame();
-
-        const decayInterval = setInterval(applyPassiveDecay, 5000);
 
         window.gameDecayInterval = decayInterval;
         }
@@ -541,11 +539,12 @@ function applyPassiveDecay() {
     energy = Math.max(0, energy - 1);
     happiness = Math.max(0, happiness - 1);
     cleanliness = Math.max(0, cleanliness - 0.5);
+    age += 1;
 
     if (hunger >= 85 || energy <= 15 || happiness <= 20 || cleanliness <= 20) {
         health = Math.max(0, health - 3);
     }
-    age += 1;
+
 
     updateStats();
 }
