@@ -36,6 +36,7 @@ let health = 100;
 let ageStats = document.getElementById("ageStats");
 let age = 0;
 
+// --------------------------------------------- pet life stages ------------------------------------------
 const petEmojis = {
     'Dog': '🐕',
     'Cat': '🐈',
@@ -43,6 +44,76 @@ const petEmojis = {
     'Turtle': '🐢',
     'Bird': '🐦'
 };
+
+const petLifeStages = {
+    baby: { min: 0, max: 4, label: 'Baby' },
+    young: { min: 5, max: 9, label: 'Young' },
+    adult: { min: 10, max: 19, label: 'Adult' },
+    senior: { min: 20, max: 100, label: 'Senior' }
+};
+
+function getPetLifeStage() {
+    for (const [key, stage] of Object.entries(petLifeStages)) {
+        if (age >= stage.min && age <= stage.max) {
+            return stage;
+        }
+    }
+    return petLifeStages.adult;
+}
+
+const petStageEmojis = {
+    'Dog': {
+        'Baby': '🐶',
+        'Young': '🐕‍🦺',
+        'Adult': '🐕',
+        'Senior': '🐕'
+    },
+    'Cat': {
+        'Baby': '🐱',
+        'Young': '🐈',
+        'Adult': '🐈‍⬛',
+        'Senior': '🐈'
+    },
+    'Rabbit': {
+        'Baby': '🐰',
+        'Young': '🐇',
+        'Adult': '🐰',
+        'Senior': '🐇'
+    },
+    'Turtle': {
+        'Baby': '🥚',
+        'Young': '🐢',
+        'Adult': '🐢',
+        'Senior': '🐢'
+    },
+    'Bird': {
+        'Baby': '🐣',
+        'Young': '🐦',
+        'Adult': '🦅',
+        'Senior': '🐦'
+    }
+};
+
+let lastLoggedStage = "Baby";
+
+function getPetStageEmoji() {
+    const currentStage = getPetLifeStage();
+    const petType = petType.value;
+    
+    const emoji = petStageEmojis[petType] && petStageEmojis[petType][currentStage.label];
+    
+    return emoji || '🐾';
+}
+
+function checkLifeStageMilestone() {
+    const currentStage = getPetLifeStage();
+    // ← CAPITAL B: 'Baby' vs 'Baby' ✓
+    if (currentStage.label !== lastLoggedStage) {
+        lastLoggedStage = currentStage.label;
+        log(`🎉 Your pet is now a ${currentStage.label}!`);
+    }
+}
+
 
 let userNameDisplay = document.getElementById("userNameDisplay");
 let petNameDisplay = document.getElementById("petNameDisplay");
@@ -407,21 +478,24 @@ function getPetEmotion() {
 
 // updates pet reaction (similar to update stats, called in update stats)
 function updatePetReaction() {
+    const petReactionDiv = document.getElementById('petReaction');
     const petEmojiEl = document.getElementById('petEmoji');
     const emotionEmojiEl = document.getElementById('emotionEmoji');
+    const petTypeDisplay = document.getElementById('petTypeDisplay');
     const petStatusEl = document.getElementById('petStatus');
-    
+
+    if (!petReactionDiv) return;
+
     const reaction = getPetEmotion();
-    
-    // Show pet type emoji (big)
-    petEmojiEl.textContent = petEmojis[petType.value] || '🐾';
-    // Show emotion emoji (smaller)
+    const lifeStage = getPetLifeStage();
+
+    // Show stage-specific emoji
+    petEmojiEl.textContent = getPetStageEmoji();
     emotionEmojiEl.textContent = reaction.emoji;
-    // Show status
-    petStatusEl.textContent = reaction.status;
     
-    // Apply background color
-    const petReactionDiv = document.getElementById('petReaction');
+    petTypeDisplay.textContent = `${petType.value} (${lifeStage.label})`;
+    petStatusEl.textContent = reaction.status;
+
     petReactionDiv.className = '';
     petReactionDiv.classList.add(reaction.emotion);
 }
@@ -444,6 +518,8 @@ function updateStats() {
     goal.textContent = "Goal: $" + savingsGoal.value + " (" + percent + "%)";
     updatePetReaction();
     saveGame();
+
+    checkLifeStageMilestone();
 }
 
 // logs which action buttons were pressed and displays it for user
@@ -454,20 +530,18 @@ function log(message) {
     logArea.scrollTop = logArea.scrollHeight;
 }
 
-// reduces/increases certain stats based on time elapsed
+// reduces/increases certain stats based on time elapse
+
 function applyPassiveDecay() {
-
     hunger = Math.min(100, hunger + 2);
-
     energy = Math.max(0, energy - 1);
-
     happiness = Math.max(0, happiness - 1);
-
     cleanliness = Math.max(0, cleanliness - 0.5);
 
     if (hunger >= 85 || energy <= 15 || happiness <= 20 || cleanliness <= 20) {
         health = Math.max(0, health - 3);
     }
+    age += 1;
 
     updateStats();
 }
@@ -502,6 +576,7 @@ function saveGame(){
         cleanliness: cleanliness,
         health: health,
         age: age,
+        lastLoggedStage: lastLoggedStage,
         expenses: expenses
     }
 
@@ -527,6 +602,7 @@ function resetGame() {
     health = 100;
     energy = 100;
     age = 0;
+    lastLoggedStage = 'Baby';
 
     expenses = {
         food: 0,
@@ -589,6 +665,7 @@ function applyLoadedState(s){
     cleanliness = typeof s.cleanliness === 'number' ? s.cleanliness : 100;
     health = typeof s.health === 'number' ? s.health : 100;
     age = typeof s.age === 'number' ? s.age : 0;
+    lastLoggedStage = typeof s.lastLoggedStage === "string" ? s.lastLoggedStage : "Baby";
 
     if (s.expenses) {
         expenses.food = s.expenses.food || 0;
@@ -619,7 +696,6 @@ function updateCategoryDisplay(category, amount, total) {
     document.getElementById(`${category}Percent`).textContent = percent;
     document.getElementById(`${category}Bar`).style.width = `${percent}%`;
 }
-
 
 // shows report and hides game
 function showReport() {
