@@ -220,7 +220,7 @@ document.addEventListener("DOMContentLoaded", function(){
         energyStats.textContent = "Energy: " + energy + "%";
         cleanlinessStats.textContent = "Cleanliness: " + cleanliness + "%";
         healthStats.textContent = "Health: " + health + "%";
-        ageStats.textContent = "Age: " + age + " years";
+        ageStats.textContent = "Age: " + age + " days";
 
         updatePetReaction();
         saveGame();
