@@ -170,11 +170,35 @@ let expenses = {
 
 let decayInterval;
 
+// ADDED: Help screen functionality
+// Help screen elements
+const help = document.getElementById("help");
+const closeHelpBtn = document.getElementById("closeHelpBtn");
+const helpFromPlayBtn = document.getElementById("helpFromPlayBtn");
+const helpFromGameBtn = document.getElementById("helpFromGameBtn");
+
 document.addEventListener("DOMContentLoaded", function(){
     setTimeout(delayBackgroundImage, 1000);
     setTimeout(delayPlayButton, 2000);
     // Decay interval will be started when a game begins
     // directs user to sign in section
+    
+    // ADDED: Help button handlers
+    helpFromPlayBtn.onclick = function() {
+        help.classList.remove('hide');
+        help.classList.add('show');
+    }
+
+    helpFromGameBtn.onclick = function() {
+        help.classList.remove('hide');
+        help.classList.add('show');
+    }
+
+    closeHelpBtn.onclick = function() {
+        help.classList.add('hide');
+        help.classList.remove('show');
+    }
+
     playButton.onclick = function(){
 
         const hasSavedGame = loadGame();
