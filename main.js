@@ -36,11 +36,15 @@ let health = 100;
 let ageStats = document.getElementById("ageStats");
 let age = 0;
 
+// Game state variables
+let currentPetName = '';
+let currentPetType = '';
+
 // --------------------------------------------- pet life stages ------------------------------------------
 const petEmojis = {
-    'Dog': '🐕',
-    'Cat': '🐈',
-    'Rabbit': '🐰',
+    'Dog': images/dog_neutral.jpg,
+    'Cat': images/cat_neutral.jpg,
+    'Rabbit': images/bunny_neutral.jpg,
     'Turtle': '🐢',
     'Bird': '🐦'
 };
@@ -65,11 +69,45 @@ function getPetStageEmoji() {
     const currentStage = getPetLifeStage();
     const petTypeVal = petType && petType.value ? petType.value : 'Dog';
     
-    const emoji = petStageEmojis[petType] && petStageEmojis[petType][currentStage.label];
+    const emoji = petStageEmojis[petTypeVal] && petStageEmojis[petTypeVal][currentStage.label];
     
     return emoji || '🐾';
 }
 
+const petStageEmojis = {
+    'Dog': {
+        'Baby': images/dog_neutral.jpg,
+        'Young': images/dog_neutral.jpg,
+        'Adult': images/dog_neutral.jpg,
+        'Senior': images/dog_neutral.jpg
+    },
+    'Cat' : {
+        'Baby': images/cat_neutral.jpg,
+        'Young': images/cat_neutral.jpg,
+        'Adult': images/cat_neutral.jpg,
+        'Senior': images/cat_neutral.jpg
+    },
+
+    'Rabbit' : {
+        'Baby': images/bunny_neutral.jpg,
+        'Young': images/bunny_neutral.jpg,
+        'Adult': images/bunny_neutral.jpg,
+        'Senior': images/bunny_neutral.jpg
+    },
+    'Turtle' : {
+        'Baby': '🥚',
+        'Young': '🐢',
+        'Adult': '🐢',
+        'Senior': '🐢'
+    },
+    'Bird': {
+        'Baby': '🐣',
+        'Young': '🐦',
+        'Adult': '🦅',
+        'Senior': '🐦'
+    }
+}
+/*
 const petStageEmojis = {
     'Dog': {
         'Baby': '🐶',
@@ -101,18 +139,8 @@ const petStageEmojis = {
         'Adult': '🦅',
         'Senior': '🐦'
     }
-};
-
+};*/
 let lastLoggedStage = "Baby";
-
-function getPetStageEmoji() {
-    const currentStage = getPetLifeStage();
-    const petType = petType.value;
-    
-    const emoji = petStageEmojis[petType] && petStageEmojis[petType][currentStage.label];
-    
-    return emoji || '🐾';
-}
 
 function checkLifeStageMilestone() {
     const currentStage = getPetLifeStage();
@@ -154,10 +182,12 @@ let expenses = {
 
 // load DOM content first before running any onclick functions tot enure there's no issues
 
+let decayInterval;
+
 document.addEventListener("DOMContentLoaded", function(){
-    setTimeout(delayBackgroundImage, 3000);
-    setTimeout(delayPlayButton, 6000);
-    setInterval(applyPassiveDecay, 5000);
+    setTimeout(delayBackgroundImage, 1000);
+    setTimeout(delayPlayButton, 2000);
+    // Decay interval will be started when a game begins
     // directs user to sign in section
     playButton.onclick = function(){
 
@@ -179,11 +209,16 @@ document.addEventListener("DOMContentLoaded", function(){
                 // display loaded state
 
                 userNameDisplay.textContent = "Hello, " + (userName.value || '').trim();
-                petNameDisplay.textContent = (petName.value || '').trim();
-
+                
                 updateStats();
+                updatePetReaction();
 
-                window.gameDecayInterval = decayInterval;
+                // Clear any existing interval and start fresh for this game session
+                if (window.gameDecayInterval) {
+                    clearInterval(window.gameDecayInterval);
+                }
+                window.gameDecayInterval = setInterval(applyPassiveDecay, 5000);
+                console.log("Started decay interval for loaded game");
             } else {
                 // directs user to sign in section 
                 userName.value = '';
@@ -215,6 +250,10 @@ document.addEventListener("DOMContentLoaded", function(){
         
         userNameDisplay.textContent = "Hello, " + userName.value;
         petNameDisplay.textContent = petName.value;
+        
+        // Store pet info in game variables
+        currentPetName = petName.value;
+        currentPetType = petType.value;
 
         let percent = money / parseInt(savingsGoal.value) * 100;
 
@@ -235,7 +274,12 @@ document.addEventListener("DOMContentLoaded", function(){
         updatePetReaction();
         saveGame();
 
-        window.gameDecayInterval = decayInterval;
+        // Clear any existing interval and start fresh for this game session
+        if (window.gameDecayInterval) {
+            clearInterval(window.gameDecayInterval);
+        }
+        window.gameDecayInterval = setInterval(applyPassiveDecay, 5000);
+        console.log("Started decay interval");
         }
 
     // action buttons
@@ -493,6 +537,7 @@ function updatePetReaction() {
     const petEmojiEl = document.getElementById('petEmoji');
     const emotionEmojiEl = document.getElementById('emotionEmoji');
     const petTypeDisplay = document.getElementById('petTypeDisplay');
+    const petNameDisplay = document.getElementById('petNameDisplay');
     const petStatusEl = document.getElementById('petStatus');
 
     if (!petReactionDiv) return;
@@ -504,7 +549,16 @@ function updatePetReaction() {
     petEmojiEl.textContent = getPetStageEmoji();
     emotionEmojiEl.textContent = reaction.emoji;
     
-    petTypeDisplay.textContent = `${petType.value} (${lifeStage.label})`;
+    // Display pet name and type
+    if (petNameDisplay) {
+        const nameToDisplay = petName.value || currentPetName;
+        petNameDisplay.textContent = nameToDisplay;
+    }
+    if (petTypeDisplay) {
+        const typeToDisplay = petType.value || currentPetType;
+        const displayText = typeToDisplay + " (" + lifeStage.label + ")";
+        petTypeDisplay.textContent = displayText;
+    }
     petStatusEl.textContent = reaction.status;
 
     petReactionDiv.className = '';
@@ -528,6 +582,11 @@ function updateStats() {
     moneySaved.textContent = "Money saved: $" + money;
     goal.textContent = "Goal: $" + savingsGoal.value + " (" + percent + "%)";
     updatePetReaction();
+    
+    // Ensure pet info is always saved
+    if (petName.value) currentPetName = petName.value;
+    if (petType.value) currentPetType = petType.value;
+    
     saveGame();
 
     checkLifeStageMilestone();
@@ -544,16 +603,18 @@ function log(message) {
 // reduces/increases certain stats based on time elapse
 
 function applyPassiveDecay() {
+    console.log("applyPassiveDecay called - Current age:", age);
     hunger = Math.min(100, hunger + 2);
     energy = Math.max(0, energy - 1);
     happiness = Math.max(0, happiness - 1);
     cleanliness = Math.max(0, cleanliness - 0.5);
     age += 1;
+    
+    console.log("After decay - age:", age, "hunger:", hunger, "energy:", energy);
 
     if (hunger >= 85 || energy <= 15 || happiness <= 20 || cleanliness <= 20) {
         health = Math.max(0, health - 3);
     }
-
 
     updateStats();
 }
@@ -564,8 +625,14 @@ function applyPassiveDecay() {
 function loadGame() {
     try {
         const raw = localStorage.getItem('petGameState');
-        if (!raw) return null;
-        return JSON.parse(raw);
+        if (!raw) {
+            console.log("No saved game found in localStorage");
+            return null;
+        }
+        const parsed = JSON.parse(raw);
+        console.log("Loaded game state:", parsed);
+        console.log("Loaded petName:", parsed.petName, "petType:", parsed.petType);
+        return parsed;
     } catch (e) {
         console.warn('Could not load game state:', e);
         return null;
@@ -575,11 +642,16 @@ function loadGame() {
 
 // saves the stats/data of the user in a dictionary and compresses it into a string before the user leaves the page
 function saveGame(){
+    // Don't save if we're still on the initial screen (no pet info set yet)
+    if (!currentPetName && !petName.value) {
+        console.log("Skipping save - no pet name set yet");
+        return;
+    }
 
     const gameState = {
         userName: userName.value,
-        petName: petName.value,
-        petType: petType.value,
+        petName: petName.value || currentPetName,
+        petType: petType.value || currentPetType,
         savingsGoal: savingsGoal.value,
         money: money,
         hunger: hunger,
@@ -592,8 +664,12 @@ function saveGame(){
         expenses: expenses
     }
 
+    console.log("saveGame() - petName.value:", petName.value, "currentPetName:", currentPetName, "saving as:", gameState.petName);
+    console.log("saveGame() - petType.value:", petType.value, "currentPetType:", currentPetType, "saving as:", gameState.petType);
+
     try {
         localStorage.setItem('petGameState', JSON.stringify(gameState));
+        console.log("Game state saved successfully");
     } catch (e) {
         console.warn("Could not save game state: ", e)
     }
@@ -605,7 +681,10 @@ function resetGame() {
 
     if (!sure) return;
 
-    try { localStorage.removeItem('petGameState'); } catch (_) {}
+    try { 
+        localStorage.removeItem('petGameState');
+        console.log('Game saved state cleared');
+    } catch (_) {}
 
     money = 10;
     hunger = 0;
@@ -643,11 +722,13 @@ function resetGame() {
         const petEmojiEl = document.getElementById("petEmoji");
         const emotionEmojiEl = document.getElementById("emotionEmoji");
         const petTypeDisplay = document.getElementById("petTypeDisplay");
+        const petNameDisplay = document.getElementById("petNameDisplay");
         const petStatusEl = document.getElementById("petStatus");
 
         if (petEmojiEl) petEmojiEl.textContent = '🐾';
         if (emotionEmojiEl) emotionEmojiEl.textContent = '🙂';
         if (petTypeDisplay) petTypeDisplay.textContent = '';
+        if (petNameDisplay) petNameDisplay.textContent = '';
         if (petStatusEl) petStatusEl.textContent = 'Your pet is okay.';
     }
 
@@ -669,6 +750,10 @@ function applyLoadedState(s){
     petName.value = s.petName || '';
     petType.value = s.petType || '';
     savingsGoal.value = s.savingsGoal || '';
+    
+    // Store pet info in game variables
+    currentPetName = s.petName || '';
+    currentPetType = s.petType || '';
 
     money = typeof s.money === 'number' ? s.money : 10;
     hunger = typeof s.hunger === 'number' ? s.hunger : 0;

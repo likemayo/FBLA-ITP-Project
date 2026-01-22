@@ -17,15 +17,16 @@ light blue: #daf5ff
 
 /* applies background color and sets height */
 body {
-    background-color: aliceblue;
-    height: 100vh;
+    background-color: #8c6959;
+    height: 100%;
     margin: 0;
 }
 
 /* standardizes how button, input, and select tags look */
 button, input, select{
-    background-color: white;
-    border: 1px, solid, #0b2538;
+    background-color: #f5ebe6;
+    color: #8c6959;
+    border: solid 3px #d2a28c;
     border-radius: 5px;
 }
 
@@ -41,7 +42,7 @@ button:hover{
 }
 
 input::placeholder{
-    color:rgb(196, 214, 229);
+    color: #8c6959;
 }
 
 /* hide and show classes to give the effect of switching pages while keeping everything in one single html document */
@@ -72,7 +73,6 @@ h1{
 }
 
 #play{
-    background-color: #8c6959;
     height: 100%;
 }
 
@@ -106,8 +106,8 @@ h1{
 
 /*----------------------------------------------------- USER INPUT -------------------------------------------*/
 #inputContainer{
-    background-color: white;
-    border: 1px, solid, #0b2538;
+    background-color: #d0bab1;
+    border: 1px, solid, #eadad4;
     padding: 10px;
     border-radius: 5px;
     width: 300px;
