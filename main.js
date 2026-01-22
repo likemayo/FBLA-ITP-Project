@@ -95,16 +95,16 @@ function getPetStageEmoji() {
 
 const petStageEmojis = {
     'Dog': {
-        'Baby': images/dog_neutral.jpg,
-        'Young': images/dog_neutral.jpg,
-        'Adult': images/dog_neutral.jpg,
-        'Senior': images/dog_neutral.jpg
+        'Baby': 'images/dog_neutral.jpg',
+        'Young': 'images/dog_neutral.jpg',
+        'Adult': 'images/dog_neutral.jpg',
+        'Senior': 'images/dog_neutral.jpg'
     },
     'Cat': {
-        'Baby': images/cat_neutral.jpg,
-        'Young': images/cat_neutral.jpg,
-        'Adult': images/cat_neutral.jpg,
-        'Senior': images/cat_neutral.jpg
+        'Baby': 'images/cat_neutral.jpg',
+        'Young': 'images/cat_neutral.jpg',
+        'Adult': 'images/cat_neutral.jpg',
+        'Senior': 'images/cat_neutral.jpg'
     },
     'Rabbit': {
         'Baby': '🐰',
