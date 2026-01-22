@@ -20,7 +20,7 @@
         
         <!---------------------------------- USER INPUTS -------------------------------->
         <section id="input" class="hide">
-            <h1 style="color: #f6e3dc">Virtupals</h1>
+            <h1>Virtupals</h1>
             <div id="inputContainer">
                 <h2>Create Your Pet</h2>
 
@@ -57,6 +57,17 @@
                     Savings Goal:
                     <input id="savingsGoal" type="number" placeholder="enter goal (USD)">
                     <span class="error-msg" id="savingsGoalError"></span>
+                </div>
+
+                <div class="difficultyContainer">
+                    Difficulty Level:
+                    <select id="difficulty">
+                        <option value="">Please select difficulty</option>
+                        <option value="easy">Easy - Slower stat decline</option>
+                        <option value="normal">Normal - Balanced gameplay</option>
+                        <option value="hard">Hard - Faster stat decline</option>
+                    </select>
+                    <span class="error-msg" id="difficultyError"></span>
                 </div>
 
                 <button id="submitInputs">submit & play</button>

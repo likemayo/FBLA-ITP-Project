@@ -13,6 +13,32 @@ const petName = document.getElementById("petName");
 const petType = document.getElementById("petType");
 const savingsGoal = document.getElementById("savingsGoal");
 const submitInputs = document.getElementById("submitInputs");
+const difficulty = document.getElementById("difficulty");
+let currentDifficulty = 'normal';
+const DIFFICULTY_SETTINGS = {
+    easy: {
+        hungerRate: 1,
+        energyRate: 0.5,
+        happinessRate: 0.5,
+        cleanlinessRate: 0.25,
+        healthDamage: 2
+    },
+    normal: {
+        hungerRate: 2,
+        energyRate: 1,
+        happinessRate: 1,
+        cleanlinessRate: 0.5,
+        healthDamage: 3
+    },
+    hard: {
+        hungerRate: 3,
+        energyRate: 1.5,
+        happinessRate: 1.5,
+        cleanlinessRate: 1,
+        healthDamage: 4
+    }
+};
+
 
 // game section variables
 
@@ -74,45 +100,11 @@ const petStageEmojis = {
         'Adult': images/dog_neutral.jpg,
         'Senior': images/dog_neutral.jpg
     },
-    'Cat' : {
+    'Cat': {
         'Baby': images/cat_neutral.jpg,
         'Young': images/cat_neutral.jpg,
         'Adult': images/cat_neutral.jpg,
         'Senior': images/cat_neutral.jpg
-    },
-
-    'Rabbit' : {
-        'Baby': images/bunny_neutral.jpg,
-        'Young': images/bunny_neutral.jpg,
-        'Adult': images/bunny_neutral.jpg,
-        'Senior': images/bunny_neutral.jpg
-    },
-    'Turtle' : {
-        'Baby': '🥚',
-        'Young': '🐢',
-        'Adult': '🐢',
-        'Senior': '🐢'
-    },
-    'Bird': {
-        'Baby': '🐣',
-        'Young': '🐦',
-        'Adult': '🦅',
-        'Senior': '🐦'
-    }
-}
-/*
-const petStageEmojis = {
-    'Dog': {
-        'Baby': '🐶',
-        'Young': '🐕‍🦺',
-        'Adult': '🐕',
-        'Senior': '🐕'
-    },
-    'Cat': {
-        'Baby': '🐱',
-        'Young': '🐈',
-        'Adult': '🐈‍⬛',
-        'Senior': '🐈'
     },
     'Rabbit': {
         'Baby': '🐰',
@@ -132,7 +124,8 @@ const petStageEmojis = {
         'Adult': '🦅',
         'Senior': '🐦'
     }
-};*/
+};
+
 let lastLoggedStage = "Baby";
 
 function checkLifeStageMilestone() {
@@ -218,6 +211,7 @@ document.addEventListener("DOMContentLoaded", function(){
                 petName.value = '';
                 petType.value = '';
                 savingsGoal.value = '';
+                difficulty.value = '';
 
 
                 play.classList.add('hide');
@@ -247,6 +241,7 @@ document.addEventListener("DOMContentLoaded", function(){
         // Store pet info in game variables
         currentPetName = petName.value;
         currentPetType = petType.value;
+        currentDifficulty = difficulty.value || 'normal';
 
         let percent = money / parseInt(savingsGoal.value) * 100;
 
@@ -495,6 +490,15 @@ function validateInputs() {
         showError(savingsGoal, savingsGoalError, "Goal must be less than or equal to $500");
         isValid = false;
     }
+
+    const difficultyError = document.getElementById('difficultyError');
+
+    clearError(difficulty, difficultyError);
+    if (difficulty.value === '') {
+        showError(difficulty, difficultyError, 'Please select a difficulty');
+        isValid = false;
+    }
+    
     return isValid;
 
 }
@@ -597,16 +601,19 @@ function log(message) {
 
 function applyPassiveDecay() {
     console.log("applyPassiveDecay called - Current age:", age);
-    hunger = Math.min(100, hunger + 2);
-    energy = Math.max(0, energy - 1);
-    happiness = Math.max(0, happiness - 1);
-    cleanliness = Math.max(0, cleanliness - 0.5);
+    const diffSettings = DIFFICULTY_SETTINGS[currentDifficulty] || DIFFICULTY_SETTINGS.normal;
+
+    hunger = Math.min(100, hunger + diffSettings.hungerRate);
+    energy = Math.max(0, energy - diffSettings.energyRate);
+    happiness = Math.max(0, happiness - diffSettings.happinessRate);
+    cleanliness = Math.max(0, cleanliness - diffSettings.cleanlinessRate);
+
     age += 1;
     
     console.log("After decay - age:", age, "hunger:", hunger, "energy:", energy);
 
     if (hunger >= 85 || energy <= 15 || happiness <= 20 || cleanliness <= 20) {
-        health = Math.max(0, health - 3);
+        health = Math.max(0, health - diffSettings.healthDamage);
     }
 
     updateStats();
@@ -646,6 +653,7 @@ function saveGame(){
         petName: petName.value || currentPetName,
         petType: petType.value || currentPetType,
         savingsGoal: savingsGoal.value,
+        difficulty: currentDifficulty,
         money: money,
         hunger: hunger,
         happiness: happiness,
@@ -699,6 +707,7 @@ function resetGame() {
     petName.value = '';
     petType.value = '';
     savingsGoal.value = '';
+    difficulty.value = '';
 
     document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
     document.querySelectorAll('.error-msg').forEach(el => el.textContent = '');
@@ -743,6 +752,7 @@ function applyLoadedState(s){
     petName.value = s.petName || '';
     petType.value = s.petType || '';
     savingsGoal.value = s.savingsGoal || '';
+    difficulty.value = s.difficulty || 'normal';
     
     // Store pet info in game variables
     currentPetName = s.petName || '';
@@ -754,6 +764,7 @@ function applyLoadedState(s){
     energy = typeof s.energy === 'number' ? s.energy : 100;
     cleanliness = typeof s.cleanliness === 'number' ? s.cleanliness : 100;
     health = typeof s.health === 'number' ? s.health : 100;
+    currentDifficulty = s.difficulty || 'normal';
     age = typeof s.age === 'number' ? s.age : 0;
     lastLoggedStage = typeof s.lastLoggedStage === "string" ? s.lastLoggedStage : "Baby";
 

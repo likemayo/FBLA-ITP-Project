@@ -1,0 +1,6 @@
+1. media queries
+2. finish making images --> organize images folder for pet stages/pet type
+3. think abt script of help screen
+4. change script to be more technical --> tehc events
+5. random events
+6. repsonsive ui --> media queries
