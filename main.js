@@ -41,13 +41,6 @@ let currentPetName = '';
 let currentPetType = '';
 
 // --------------------------------------------- pet life stages ------------------------------------------
-const petEmojis = {
-    'Dog': images/dog_neutral.jpg,
-    'Cat': images/cat_neutral.jpg,
-    'Rabbit': images/bunny_neutral.jpg,
-    'Turtle': '🐢',
-    'Bird': '🐦'
-};
 
 const petLifeStages = {
     baby: { min: 0, max: 4, label: 'Baby' },
