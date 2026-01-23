@@ -188,6 +188,18 @@ h1{
     margin: 5px auto;
     width: 95px;
 }
+
+#vetBtn {
+    transition: background-color 0.3s ease;
+}
+
+#vetBtn[style*="background-color: rgb(211, 47, 47)"],
+button[style*="background-color: rgb(211, 47, 47)"] {
+    background-color: #d32f2f !important;
+    color: white !important;
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(211, 47, 47, 0.6);
+}
 #gameContainer #log {
     grid-column: 5/6;
     grid-row: 1/2;
@@ -296,6 +308,74 @@ h1{
 #petReaction.neutral {
   background-color: white;
   color: #030d14;
+}
+
+/* ============ MEDICAL ALERTS ============ */
+
+#medicalAlert {
+  margin-top: 15px;
+  padding: 12px;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ff8787 100%);
+  border: 2px solid #d32f2f;
+  border-radius: 8px;
+  color: white;
+  text-align: center;
+  animation: medicalPulse 1s ease-in-out infinite;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+}
+
+#medicalAlert.infected {
+  background: linear-gradient(135deg, #d32f2f 0%, #ff6b6b 100%);
+  border-color: #b71c1c;
+  box-shadow: 0 4px 12px rgba(211, 47, 47, 0.6);
+}
+
+#medicalAlert.injured {
+  background: linear-gradient(135deg, #f57c00 0%, #ffb74d 100%);
+  border-color: #e65100;
+  box-shadow: 0 4px 12px rgba(245, 124, 0, 0.4);
+}
+
+#medicalAlert.poisoned {
+  background: linear-gradient(135deg, #7b1fa2 0%, #ba68c8 100%);
+  border-color: #4a148c;
+  box-shadow: 0 4px 12px rgba(123, 31, 162, 0.4);
+}
+
+#medicalAlert.fractured {
+  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
+  border-color: #0d47a1;
+  box-shadow: 0 4px 12px rgba(21, 101, 192, 0.4);
+}
+
+#medicalAlert.allergic {
+  background: linear-gradient(135deg, #c2185b 0%, #f06292 100%);
+  border-color: #880e4f;
+  box-shadow: 0 4px 12px rgba(194, 24, 91, 0.4);
+}
+
+#medicalCondition {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0 0 5px 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+#medicalDescription {
+  font-size: 13px;
+  margin: 0;
+  opacity: 0.95;
+}
+
+@keyframes medicalPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 6px 16px rgba(255, 107, 107, 0.6);
+  }
 }
 
 /*------------------------------------- BUDGET REPORT SECTION --------------------------------------*/

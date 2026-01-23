@@ -65,6 +65,201 @@ let age = 0;
 // Game state variables
 let currentPetName = '';
 let currentPetType = '';
+let currentMedicalCondition = null;
+
+// --------------------------------------------- MEDICAL EVENTS SYSTEM ------------------------------------------
+
+const medicalEvents = {
+    common_cold: {
+        name: '🦠 Common Cold',
+        emoji: '🤧',
+        description: 'Your pet has a runny nose and sneezing fits.',
+        healthDamage: 1,
+        treatmentCost: 10,
+        rarity: 'common'
+    },
+    flu: {
+        name: '🦠 Flu',
+        emoji: '🤒',
+        description: 'Your pet has a fever and is feeling very sick.',
+        healthDamage: 3,
+        treatmentCost: 15,
+        rarity: 'uncommon'
+    },
+    broken_leg: {
+        name: '🦵 Broken Leg',
+        emoji: '🩹',
+        description: 'Your pet has a fracture and can barely walk.',
+        healthDamage: 4,
+        treatmentCost: 25,
+        rarity: 'rare'
+    },
+    food_poisoning: {
+        name: '🤢 Food Poisoning',
+        emoji: '🤮',
+        description: 'Your pet ate something bad and feels nauseous.',
+        healthDamage: 2,
+        treatmentCost: 12,
+        rarity: 'uncommon'
+    },
+    infection: {
+        name: '🩸 Infection',
+        emoji: '🔴',
+        description: 'Your pet has developed a serious infection.',
+        healthDamage: 5,
+        treatmentCost: 30,
+        rarity: 'rare'
+    },
+    allergic_reaction: {
+        name: '🔴 Allergic Reaction',
+        emoji: '😵',
+        description: 'Your pet is having an allergic reaction.',
+        healthDamage: 2,
+        treatmentCost: 18,
+        rarity: 'uncommon'
+    },
+    sprain: {
+        name: '🦶 Sprain',
+        emoji: '⚠️',
+        description: 'Your pet has sprained their joints.',
+        healthDamage: 2,
+        treatmentCost: 14,
+        rarity: 'common'
+    },
+    parasites: {
+        name: '🪳 Parasites',
+        emoji: '🦠',
+        description: 'Your pet has internal parasites.',
+        healthDamage: 3,
+        treatmentCost: 20,
+        rarity: 'uncommon'
+    }
+};
+
+let petMedicalStatus = {
+    condition: null,
+    turnsRemaining: 0,
+    healthDamagePerTurn: 0
+};
+
+function getRandomMedicalEvent() {
+    const events = Object.keys(medicalEvents);
+    
+    // Define weights for each rarity level
+    const rarityWeights = {
+        'common': 5,      // 5x more likely
+        'uncommon': 3,    // 3x more likely
+        'rare': 1         // Least likely
+    };
+    
+    // Create weighted pool
+    let weightedPool = [];
+    events.forEach(eventKey => {
+        const event = medicalEvents[eventKey];
+        const weight = rarityWeights[event.rarity] || 1;
+        for (let i = 0; i < weight; i++) {
+            weightedPool.push(eventKey);
+        }
+    });
+    
+    // Pick random from weighted pool
+    const randomEvent = weightedPool[Math.floor(Math.random() * weightedPool.length)];
+    return medicalEvents[randomEvent];
+}
+
+function infectPet() {
+    if (petMedicalStatus.condition !== null) {
+        return; // Pet already has a condition
+    }
+    
+    // Random chance to get infected (adjustable percentage)
+    const chanceOfInfection = 8; // 8% chance per cycle
+    if (Math.random() * 100 > chanceOfInfection) {
+        return;
+    }
+    
+    const newCondition = getRandomMedicalEvent();
+    petMedicalStatus.condition = newCondition;
+    petMedicalStatus.turnsRemaining = newCondition.duration;
+    petMedicalStatus.healthDamagePerTurn = newCondition.healthDamage;
+    
+    log(`⚠️ OH NO! Your pet has contracted ${newCondition.name.split(' ')[1]}!`);
+    displayMedicalCondition();
+    updateVetButtonText();
+}
+
+function displayMedicalCondition() {
+    const medicalAlert = document.getElementById("medicalAlert");
+    const medicalCondition = document.getElementById("medicalCondition");
+    const medicalDescription = document.getElementById("medicalDescription");
+    
+    if (petMedicalStatus.condition !== null) {
+        medicalCondition.textContent = petMedicalStatus.condition.name;
+        medicalDescription.textContent = `${petMedicalStatus.condition.description} (Treatment: $${petMedicalStatus.condition.treatmentCost})`;
+        
+        // Remove all condition classes
+        medicalAlert.classList.remove('infected', 'injured', 'poisoned', 'fractured', 'allergic');
+        
+        // Add appropriate class based on condition
+        if (petMedicalStatus.condition.name.includes('Infection')) {
+            medicalAlert.classList.add('infected');
+        } else if (petMedicalStatus.condition.name.includes('Leg') || petMedicalStatus.condition.name.includes('Sprain')) {
+            medicalAlert.classList.add('injured');
+        } else if (petMedicalStatus.condition.name.includes('Poisoning')) {
+            medicalAlert.classList.add('poisoned');
+        } else if (petMedicalStatus.condition.name.includes('Fracture')) {
+            medicalAlert.classList.add('fractured');
+        } else if (petMedicalStatus.condition.name.includes('Allergic')) {
+            medicalAlert.classList.add('allergic');
+        }
+        
+        medicalAlert.classList.remove('hide');
+    } else {
+        medicalAlert.classList.add('hide');
+    }
+    
+    // Update vet button text based on condition
+    updateVetButtonText();
+}
+
+function updateVetButtonText() {
+    if (petMedicalStatus.condition !== null) {
+        const cost = petMedicalStatus.condition.treatmentCost;
+        const diseaseName = petMedicalStatus.condition.name.split(' ').slice(1).join(' ');
+        vetBtn.textContent = `Treat ${diseaseName} ($${cost})`;
+        vetBtn.style.backgroundColor = '#d32f2f';
+    } else {
+        vetBtn.textContent = 'Vet Visit ($20)';
+        vetBtn.style.backgroundColor = '';
+    }
+}
+
+function treatMedicalCondition() {
+    if (petMedicalStatus.condition === null) {
+        log("Your pet is not sick. No need to visit the vet.");
+        return false;
+    }
+    
+    const treatmentCost = petMedicalStatus.condition.treatmentCost;
+    
+    if (money < treatmentCost) {
+        log(`🏥 Not enough money! Vet visit costs $${treatmentCost} but you only have $${money}.`);
+        return false;
+    }
+    
+    money -= treatmentCost;
+    expenses.healthcare += treatmentCost;
+    
+    log(`💉 Your pet was treated and is now healthy! Cost: $${treatmentCost}`);
+    petMedicalStatus.condition = null;
+    petMedicalStatus.turnsRemaining = 0;
+    health = Math.min(100, health + 40); // Restore some health
+    displayMedicalCondition();
+    updateVetButtonText();
+    updateStats();
+    
+    return true;
+}
 
 // --------------------------------------------- pet life stages ------------------------------------------
 
@@ -362,16 +557,21 @@ document.addEventListener("DOMContentLoaded", function(){
 
     // heals pet by 20%, but also costs lots of money
     vetBtn.onclick = function() {
-        if (money >= 20) {
-            money -= 20;
-            health = Math.min(100, health + 40);
-            expenses.healthcare += 20;
-            
-            cleanliness = Math.min(100, cleanliness + 10);
-            log("You visited the vet. - $20");
+        // Check if pet has a medical condition and treat it
+        if (petMedicalStatus.condition !== null) {
+            treatMedicalCondition();
         } else {
-            log("Not enough money for a vet visit");
-
+            // Regular vet visit for general health
+            if (money >= 20) {
+                money -= 20;
+                health = Math.min(100, health + 40);
+                expenses.healthcare += 20;
+                
+                cleanliness = Math.min(100, cleanliness + 10);
+                log("You visited the vet. - $20");
+            } else {
+                log("Not enough money for a vet visit");
+            }
         }
         // updates stats immediately after
         updateStats();
@@ -603,6 +803,7 @@ function updateStats() {
     moneySaved.textContent = "Money saved: $" + money;
     goal.textContent = "Goal: $" + savingsGoal.value + " (" + percent + "%)";
     updatePetReaction();
+    displayMedicalCondition();
     
     // Ensure pet info is always saved
     if (petName.value) currentPetName = petName.value;
@@ -638,6 +839,15 @@ function applyPassiveDecay() {
 
     if (hunger >= 85 || energy <= 15 || happiness <= 20 || cleanliness <= 20) {
         health = Math.max(0, health - diffSettings.healthDamage);
+    }
+
+    // Check for random medical events
+    infectPet();
+    
+    // Apply health damage from existing medical conditions (disease persists until treated by vet)
+    if (petMedicalStatus.condition !== null) {
+        health = Math.max(0, health - petMedicalStatus.healthDamagePerTurn);
+        // Disease does NOT auto-recover - only vet treatment can cure it
     }
 
     updateStats();
@@ -686,7 +896,8 @@ function saveGame(){
         health: health,
         age: age,
         lastLoggedStage: lastLoggedStage,
-        expenses: expenses
+        expenses: expenses,
+        petMedicalStatus: petMedicalStatus
     }
 
     console.log("saveGame() - petName.value:", petName.value, "currentPetName:", currentPetName, "saving as:", gameState.petName);
@@ -719,6 +930,13 @@ function resetGame() {
     energy = 100;
     age = 0;
     lastLoggedStage = 'Baby';
+    
+    // Reset medical status
+    petMedicalStatus = {
+        condition: null,
+        turnsRemaining: 0,
+        healthDamagePerTurn: 0
+    };
 
     expenses = {
         food: 0,
@@ -756,6 +974,12 @@ function resetGame() {
         if (petTypeDisplay) petTypeDisplay.textContent = '';
         if (petNameDisplay) petNameDisplay.textContent = '';
         if (petStatusEl) petStatusEl.textContent = 'Your pet is okay.';
+    }
+    
+    // Hide medical alert
+    const medicalAlert = document.getElementById("medicalAlert");
+    if (medicalAlert) {
+        medicalAlert.classList.add('hide');
     }
 
     game.classList.remove('show');
@@ -797,6 +1021,11 @@ function applyLoadedState(s){
         expenses.healthcare = s.expenses.healthcare || 0;
         expenses.hygiene = s.expenses.hygiene || 0;
         expenses.entertainment = s.expenses.entertainment || 0;
+    }
+    
+    // Restore medical status
+    if (s.petMedicalStatus) {
+        petMedicalStatus = s.petMedicalStatus;
     }
 }
 
