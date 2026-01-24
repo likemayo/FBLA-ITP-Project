@@ -266,8 +266,7 @@ function treatMedicalCondition() {
 const petLifeStages = {
     baby: { min: 0, max: 4, label: 'Baby' },
     young: { min: 5, max: 9, label: 'Young' },
-    adult: { min: 10, max: 19, label: 'Adult' },
-    senior: { min: 20, max: 100, label: 'Senior' }
+    adult: { min: 10, max: 100, label: 'Adult' }
 };
 
 function getPetLifeStage() {
@@ -288,36 +287,36 @@ function getPetStageEmoji() {
     return emoji || '🐾';
 }
 
+function getPetImagePath() {
+    const currentStage = getPetLifeStage();
+    const petTypeVal = petType && petType.value ? petType.value : 'Dog';
+    const emotion = getPetEmotion().emotion;
+    
+    // Format: dog_baby_happy.png
+    const imagePath = `images/${petTypeVal.toLowerCase()}_${currentStage.label.toLowerCase()}_${emotion}.png`;
+    return imagePath;
+}
+
 const petStageEmojis = {
     'Dog': {
         'Baby': 'images/dog_neutral.jpg',
         'Young': 'images/dog_neutral.jpg',
-        'Adult': 'images/dog_neutral.jpg',
-        'Senior': 'images/dog_neutral.jpg'
+        'Adult': 'images/dog_neutral.jpg'
     },
     'Cat': {
         'Baby': 'images/cat_neutral.jpg',
         'Young': 'images/cat_neutral.jpg',
-        'Adult': 'images/cat_neutral.jpg',
-        'Senior': 'images/cat_neutral.jpg'
+        'Adult': 'images/cat_neutral.jpg'
     },
     'Rabbit': {
         'Baby': '🐰',
         'Young': '🐇',
-        'Adult': '🐰',
-        'Senior': '🐇'
+        'Adult': '🐰'
     },
     'Turtle': {
         'Baby': '🥚',
         'Young': '🐢',
-        'Adult': '🐢',
-        'Senior': '🐢'
-    },
-    'Bird': {
-        'Baby': '🐣',
-        'Young': '🐦',
-        'Adult': '🦅',
-        'Senior': '🐦'
+        'Adult': '🐢'
     }
 };
 
@@ -528,7 +527,7 @@ document.addEventListener("DOMContentLoaded", function(){
     // allows pet to rest and raise energy
     restBtn.onclick = function() {
         energy = Math.min(100, energy + 20);
-        happiness -= 5;
+        happiness = Math.max(0, happiness - 5);
         log("You pet took a rest.");
 
         // updates stats immediately after
@@ -766,8 +765,11 @@ function updatePetReaction() {
     const reaction = getPetEmotion();
     const lifeStage = getPetLifeStage();
 
-    // Show stage-specific emoji
-    petEmojiEl.textContent = getPetStageEmoji();
+    // Show stage-specific image
+    if (petEmojiEl && petEmojiEl.tagName === 'IMG') {
+        petEmojiEl.src = getPetImagePath();
+        petEmojiEl.alt = `${currentPetType} ${lifeStage.label}`;
+    }
     emotionEmojiEl.textContent = reaction.emoji;
     
     // Display pet name and type
@@ -969,7 +971,10 @@ function resetGame() {
         const petNameDisplay = document.getElementById("petNameDisplay");
         const petStatusEl = document.getElementById("petStatus");
 
-        if (petEmojiEl) petEmojiEl.textContent = '🐾';
+        if (petEmojiEl && petEmojiEl.tagName === 'IMG') {
+            petEmojiEl.src = '';
+            petEmojiEl.alt = '';
+        }
         if (emotionEmojiEl) emotionEmojiEl.textContent = '🙂';
         if (petTypeDisplay) petTypeDisplay.textContent = '';
         if (petNameDisplay) petNameDisplay.textContent = '';
