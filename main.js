@@ -357,8 +357,10 @@ let expenses = {
     entertainment: 0,
     hygiene: 0,
     healthcare: 0
-
 }
+
+// cooldown tracking
+let choresCooldown = false;
 
 // load DOM content first before running any onclick functions tot enure there's no issues
 
@@ -577,8 +579,6 @@ document.addEventListener("DOMContentLoaded", function(){
     };
 
     // cooldown after earning $10 from doing chores
-    let choresCooldown = false;
-
     choresBtn.onclick = function () {
         if (choresCooldown) {
             log("Chores are on cooldown. Try again soon!");
@@ -791,6 +791,27 @@ function updatePetReaction() {
 
 // --------------------------------- UPDATING STATS ---------------------------------
 
+// checks if game is over (pet died or starved)
+function checkGameOver() {
+    if (health <= 0) {
+        setTimeout(() => {
+            alert(`💀 Oh no! ${currentPetName || 'Your pet'} has passed away...\n\nYour pet's health couldn't be saved. Better luck next time!`);
+            resetGame(true); // Skip confirmation popup
+        }, 100);
+        return true;
+    }
+    
+    if (hunger >= 100) {
+        setTimeout(() => {
+            alert(`💀 Oh no! ${currentPetName || 'Your pet'} has starved...\n\nYou didn't feed your pet in time. Better luck next time!`);
+            resetGame(true); // Skip confirmation popup
+        }, 100);
+        return true;
+    }
+    
+    return false;
+}
+
 // updates stats, amount of money, and percent of money saved
 function updateStats() {
     hungerStats.textContent = "Hunger: " + hunger + "%";
@@ -810,6 +831,11 @@ function updateStats() {
     // Ensure pet info is always saved
     if (petName.value) currentPetName = petName.value;
     if (petType.value) currentPetType = petType.value;
+    
+    // Check for game over conditions
+    if (checkGameOver()) {
+        return;
+    }
     
     saveGame();
 
@@ -914,10 +940,11 @@ function saveGame(){
 }
 
 // deletes any saved data in case user wants a fresh start
-function resetGame() {
-    const sure = confirm("Are you sure you want to reset the game and delete saved progress?")
-
-    if (!sure) return;
+function resetGame(skipConfirm = false) {
+    if (!skipConfirm) {
+        const sure = confirm("Are you sure you want to reset the game and delete saved progress?")
+        if (!sure) return;
+    }
 
     try { 
         localStorage.removeItem('petGameState');
@@ -932,6 +959,7 @@ function resetGame() {
     energy = 100;
     age = 0;
     lastLoggedStage = 'Baby';
+    choresCooldown = false; // Reset cooldown
     
     // Reset medical status
     petMedicalStatus = {
