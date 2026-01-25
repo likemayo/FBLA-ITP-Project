@@ -68,6 +68,14 @@
             </div>
         </section>
         
+        <!-- Banking Header Bar (Fixed Top Right) -->
+        <div id="bankingHeader" class="hide">
+            <span id="headerWallet">💰 Wallet: $0</span>
+            <span id="headerSavings">🏦 Savings: $0</span>
+            <span id="headerInterest">📈 Interest: $0</span>
+            <span id="headerStocks">📊 Stocks: $0 (0)</span>
+        </div>
+
         <!---------------------------------- USER INPUTS -------------------------------->
         <section id="input" class="hide">
             <h1>Virtupals</h1>
@@ -142,9 +150,62 @@
                 </div>
 
                 <div id="money">
-                    <h3>Money</h3>
-                    <p id="moneySaved"></p>
-                    <p id="goal"></p>
+                    <h3>💰 Banking</h3>
+                    <div id="bankingTabs">
+                        <button class="bankTab active" data-tab="wallet">Wallet</button>
+                        <button class="bankTab" data-tab="savings">Savings</button>
+                        <button class="bankTab" data-tab="stocks">Stocks</button>
+                    </div>
+
+                    <!-- Wallet Tab -->
+                    <div id="walletTab" class="bankTabContent active">
+                        <p id="moneySaved"></p>
+                        <p id="goal"></p>
+                    </div>
+
+                    <!-- Savings Tab -->
+                    <div id="savingsTab" class="bankTabContent hide">
+                        <p id="walletBalanceSavings" style="font-weight: bold; color: #8c6959; margin-bottom: 8px;">Wallet: $0</p>
+                        <p id="savingsBalance">Savings: $0</p>
+                        <p id="savingsInterest">Interest earned: $0</p>
+                        <div style="background-color: #f0f8ff; border-left: 3px solid #94c7b4; padding: 8px; border-radius: 4px; margin: 8px 0; font-size: 11px;">
+                            <strong>💰 How it works:</strong>
+                            <br>• 0.5% interest per cycle (5 seconds)
+                            <br>• Grows automatically over time
+                            <br>• ~30% annual return if untouched
+                            <br>• Safe, guaranteed income
+                        </div>
+                        <div id="savingsActions">
+                            <button id="depositBtn" class="savingsBtn">Deposit</button>
+                            <button id="withdrawBtn" class="savingsBtn">Withdraw</button>
+                        </div>
+                    </div>
+
+                    <!-- Stocks Tab -->
+                    <div id="stocksTab" class="bankTabContent hide">
+                        <p id="walletBalanceStocks" style="font-weight: bold; color: #8c6959; margin-bottom: 8px;">Wallet: $0</p>
+                        <p id="portfolioValue">Portfolio value: $0</p>
+                        <div style="background-color: #fffbf0; border-left: 3px solid #ff9800; padding: 8px; border-radius: 4px; margin: 8px 0; font-size: 11px;">
+                            <strong>📈 Stock Returns (60 sec resolve):</strong>
+                            <br><span style="color: #2196f3;">🔵 Blue Chip:</span> $15 cost → +$15 (75% win)
+                            <br><span style="color: #ff9800;">🟠 Growth:</span> $30 cost → +$45 (60% win)
+                            <br><span style="color: #f44336;">🔴 Penny:</span> $50 cost → +$100 (50% win)
+                            <br><em>Failure = lose 50% of cost</em>
+                        </div>
+                        <div id="stocksActions">
+                            <button id="buyBlueChipBtn" class="stockBtn">Blue Chip ($15)</button>
+                            <button id="buyGrowthBtn" class="stockBtn">Growth ($30)</button>
+                            <button id="buyPennyBtn" class="stockBtn">Penny ($50)</button>
+                        </div>
+                        <div id="pendingStocks">
+                            <h4 style="font-size: 12px; margin: 8px 0 4px 0;">Pending</h4>
+                            <div id="pendingList"></div>
+                        </div>
+                        <div id="resolvedStocks">
+                            <h4 style="font-size: 12px; margin: 8px 0 4px 0;">Resolved</h4>
+                            <div id="resolvedList"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="petDisplay">

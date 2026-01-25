@@ -67,6 +67,42 @@ let currentPetName = '';
 let currentPetType = '';
 let currentMedicalCondition = null;
 
+// --------------------------------------------- BANKING SYSTEM VARIABLES ------------------------------------------
+
+let savingsBalance = 0;
+let savingsInterestTotal = 0;
+let stockPortfolio = []; // Array to hold pending stocks
+let resolvedStocks = []; // Array to hold resolved stocks
+let stockCounter = 0; // To generate unique IDs
+
+// Stock definitions
+const STOCK_TYPES = {
+    blueChip: {
+        name: 'Blue Chip',
+        cost: 15,
+        successRate: 0.75,
+        profitOnSuccess: 15,
+        lossOnFailure: 9,
+        color: '#2196f3'
+    },
+    growth: {
+        name: 'Growth Stock',
+        cost: 30,
+        successRate: 0.60,
+        profitOnSuccess: 45,
+        lossOnFailure: 18,
+        color: '#ff9800'
+    },
+    penny: {
+        name: 'Penny Stock',
+        cost: 50,
+        successRate: 0.50,
+        profitOnSuccess: 100,
+        lossOnFailure: 30,
+        color: '#f44336'
+    }
+};
+
 // --------------------------------------------- MEDICAL EVENTS SYSTEM ------------------------------------------
 
 const medicalEvents = {
@@ -331,6 +367,214 @@ function checkLifeStageMilestone() {
     }
 }
 
+// --------------------------------------------- BANKING SYSTEM FUNCTIONS ------------------------------------------
+
+function buyStock(stockType) {
+    const stock = STOCK_TYPES[stockType];
+    
+    if (money < stock.cost) {
+        log(`💰 Not enough money! ${stock.name} costs $${stock.cost}, you have $${money}.`);
+        return;
+    }
+    
+    // Deduct cost
+    money -= stock.cost;
+    
+    // Create stock object with 60-second timer
+    const stockId = stockCounter++;
+    const newStock = {
+        id: stockId,
+        type: stockType,
+        name: stock.name,
+        cost: stock.cost,
+        timeRemaining: 60,
+        successRate: stock.successRate,
+        profitOnSuccess: stock.profitOnSuccess,
+        lossOnFailure: stock.lossOnFailure,
+        startTime: Date.now()
+    };
+    
+    stockPortfolio.push(newStock);
+    log(`📈 Bought ${stock.name} for $${stock.cost}. Resolves in 60 seconds...`);
+    updateStats();
+    updateStocksDisplay();
+}
+
+function updateStocksDisplay() {
+    const pendingList = document.getElementById('pendingList');
+    const resolvedList = document.getElementById('resolvedList');
+    const portfolioValue = document.getElementById('portfolioValue');
+    
+    pendingList.innerHTML = '';
+    resolvedList.innerHTML = '';
+    
+    // Display pending stocks
+    stockPortfolio.forEach(stock => {
+        const card = document.createElement('div');
+        card.className = 'stockCard pending';
+        const timeLeft = Math.max(0, stock.timeRemaining);
+        card.innerHTML = `<strong>${stock.name}</strong><br>Cost: $${stock.cost}<br><span class="stockTimer">⏱ ${timeLeft}s</span>`;
+        pendingList.appendChild(card);
+    });
+    
+    // Display resolved stocks
+    resolvedStocks.slice(-5).forEach(stock => {
+        const card = document.createElement('div');
+        card.className = `stockCard ${stock.result}`;
+        const resultText = stock.result === 'success' ? `+$${stock.profit} ✓` : `-$${stock.loss} ✗`;
+        card.innerHTML = `<strong>${stock.name}</strong><br>${resultText}`;
+        resolvedList.appendChild(card);
+    });
+    
+    // Calculate portfolio value
+    const totalInvested = stockPortfolio.reduce((sum, s) => sum + s.cost, 0);
+    portfolioValue.textContent = `Pending: $${totalInvested}`;
+}
+
+function resolveStocks() {
+    const now = Date.now();
+    const stillPending = [];
+    
+    stockPortfolio.forEach(stock => {
+        const elapsed = Math.floor((now - stock.startTime) / 1000);
+        stock.timeRemaining = Math.max(0, 60 - elapsed);
+        
+        if (elapsed >= 60) {
+            // Resolve this stock
+            const success = Math.random() < stock.successRate;
+            
+            if (success) {
+                money += stock.profitOnSuccess;
+                happiness = Math.min(100, happiness + 5);
+                log(`✅ ${stock.name} succeeded! +$${stock.profitOnSuccess}`);
+                resolvedStocks.push({
+                    name: stock.name,
+                    result: 'success',
+                    profit: stock.profitOnSuccess,
+                    loss: 0
+                });
+            } else {
+                money -= stock.lossOnFailure;
+                happiness = Math.max(0, happiness - 10);
+                log(`❌ ${stock.name} failed! -$${stock.lossOnFailure}`);
+                resolvedStocks.push({
+                    name: stock.name,
+                    result: 'failed',
+                    profit: 0,
+                    loss: stock.lossOnFailure
+                });
+            }
+        } else {
+            stillPending.push(stock);
+        }
+    });
+    
+    stockPortfolio = stillPending;
+    if (resolvedStocks.length > 0) {
+        updateStocksDisplay();
+    }
+}
+
+function depositSavings() {
+    const amount = prompt(`Enter amount to deposit (Current wallet: $${money}):`);
+    
+    if (amount === null) return;
+    
+    const depositAmount = parseFloat(amount);
+    
+    if (isNaN(depositAmount) || depositAmount <= 0) {
+        log("Invalid deposit amount.");
+        return;
+    }
+    
+    if (depositAmount > money) {
+        log(`Not enough money! You have $${money}.`);
+        return;
+    }
+    
+    money -= depositAmount;
+    savingsBalance += depositAmount;
+    log(`💾 Deposited $${depositAmount} to savings. New balance: $${savingsBalance.toFixed(2)}`);
+    updateStats();
+}
+
+function withdrawSavings() {
+    const amount = prompt(`Enter amount to withdraw (Current savings: $${savingsBalance.toFixed(2)}):`);
+    
+    if (amount === null) return;
+    
+    const withdrawAmount = parseFloat(amount);
+    
+    if (isNaN(withdrawAmount) || withdrawAmount <= 0) {
+        log("Invalid withdrawal amount.");
+        return;
+    }
+    
+    if (withdrawAmount > savingsBalance) {
+        log(`Not enough savings! You have $${savingsBalance.toFixed(2)}.`);
+        return;
+    }
+    
+    savingsBalance -= withdrawAmount;
+    money += withdrawAmount;
+    log(`🏦 Withdrew $${withdrawAmount} from savings. New balance: $${savingsBalance.toFixed(2)}`);
+    updateStats();
+}
+
+function applySavingsInterest() {
+    const interestEarned = savingsBalance * 0.005; // 0.5% per cycle
+    savingsBalance += interestEarned;
+    savingsInterestTotal += interestEarned;
+}
+
+function updateBankingDisplay() {
+    // Update wallet tab
+    const moneySaved = document.getElementById('moneySaved');
+    const goal = document.getElementById('goal');
+    if (moneySaved && goal) {
+        moneySaved.textContent = `Wallet: $${money}`;
+        let percent = Math.floor((money / parseInt(savingsGoal.value)) * 100);
+        goal.textContent = `Goal: $${savingsGoal.value} (${percent}%)`;
+    }
+    
+    // Update header bar with all banking info
+    const headerWallet = document.getElementById('headerWallet');
+    const headerSavings = document.getElementById('headerSavings');
+    const headerInterest = document.getElementById('headerInterest');
+    const headerStocks = document.getElementById('headerStocks');
+    
+    if (headerWallet) headerWallet.textContent = `💰 Wallet: $${money}`;
+    if (headerSavings) headerSavings.textContent = `🏦 Savings: $${savingsBalance.toFixed(2)}`;
+    if (headerInterest) headerInterest.textContent = `📈 Interest: $${savingsInterestTotal.toFixed(2)}`;
+    if (headerStocks) {
+        const totalInvested = stockPortfolio.reduce((sum, s) => sum + s.cost, 0);
+        headerStocks.textContent = `📊 Stocks: $${totalInvested} (${stockPortfolio.length} pending)`;
+    }
+    
+    // Update savings tab wallet balance
+    const walletBalanceSavings = document.getElementById('walletBalanceSavings');
+    if (walletBalanceSavings) {
+        walletBalanceSavings.textContent = `Wallet: $${money}`;
+    }
+    
+    // Update savings tab
+    const savingsBalanceEl = document.getElementById('savingsBalance');
+    const savingsInterestEl = document.getElementById('savingsInterest');
+    if (savingsBalanceEl && savingsInterestEl) {
+        savingsBalanceEl.textContent = `Savings: $${savingsBalance.toFixed(2)}`;
+        savingsInterestEl.textContent = `Interest earned: $${savingsInterestTotal.toFixed(2)}`;
+    }
+    
+    // Update stocks tab wallet balance
+    const walletBalanceStocks = document.getElementById('walletBalanceStocks');
+    if (walletBalanceStocks) {
+        walletBalanceStocks.textContent = `Wallet: $${money}`;
+    }
+    
+    // Update stocks tab
+    updateStocksDisplay();
+}
+
 
 let userNameDisplay = document.getElementById("userNameDisplay");
 let petNameDisplay = document.getElementById("petNameDisplay");
@@ -411,6 +655,7 @@ document.addEventListener("DOMContentLoaded", function(){
                 play.classList.remove('show');
                 input.classList.add('hide');
                 game.classList.add("show");
+                document.getElementById('bankingHeader').classList.remove('hide');
 
                 // display loaded state
 
@@ -471,6 +716,7 @@ document.addEventListener("DOMContentLoaded", function(){
         input.classList.add('hide');
         game.classList.remove('hide');
         game.classList.add('show');
+        document.getElementById('bankingHeader').classList.remove('hide');
 
         hungerStats.textContent = "Hunger: " + hunger + "%";
         happinessStats.textContent = "Happiness: " + happiness + "%";
@@ -608,6 +854,43 @@ document.addEventListener("DOMContentLoaded", function(){
         }, 1000);
         updateStats(); // updates stats immediately after
     };
+
+    // ----- Banking Tab System -----
+    const bankTabs = document.querySelectorAll('.bankTab');
+    bankTabs.forEach(tab => {
+        tab.onclick = function() {
+            const tabName = this.getAttribute('data-tab');
+            
+            // Remove active class from all tabs and contents
+            bankTabs.forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.bankTabContent').forEach(content => {
+                content.classList.remove('active');
+                content.classList.add('hide');
+            });
+            
+            // Add active class to clicked tab and corresponding content
+            this.classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.remove('hide');
+        };
+    });
+
+    // ----- Stock Buttons -----
+    const buyBlueChipBtn = document.getElementById('buyBlueChipBtn');
+    const buyGrowthBtn = document.getElementById('buyGrowthBtn');
+    const buyPennyBtn = document.getElementById('buyPennyBtn');
+
+    if (buyBlueChipBtn) buyBlueChipBtn.onclick = () => buyStock('blueChip');
+    if (buyGrowthBtn) buyGrowthBtn.onclick = () => buyStock('growth');
+    if (buyPennyBtn) buyPennyBtn.onclick = () => buyStock('penny');
+
+    // ----- Savings Buttons -----
+    const depositBtn = document.getElementById('depositBtn');
+    const withdrawBtn = document.getElementById('withdrawBtn');
+
+    if (depositBtn) depositBtn.onclick = depositSavings;
+    if (withdrawBtn) withdrawBtn.onclick = withdrawSavings;
+
     const resetBtn = document.getElementById("resetBtn");
     resetBtn.onclick = resetGame;
 
@@ -821,10 +1104,7 @@ function updateStats() {
     healthStats.textContent = "Health: " + health + "%";
     ageStats.textContent = "Age: " + age + " days";
     
-    
-    let percent = Math.floor((money / parseInt(savingsGoal.value)) * 100);
-    moneySaved.textContent = "Money saved: $" + money;
-    goal.textContent = "Goal: $" + savingsGoal.value + " (" + percent + "%)";
+    updateBankingDisplay();
     updatePetReaction();
     displayMedicalCondition();
     
@@ -878,6 +1158,10 @@ function applyPassiveDecay() {
         // Disease does NOT auto-recover - only vet treatment can cure it
     }
 
+    // Apply savings interest and resolve stocks
+    applySavingsInterest();
+    resolveStocks();
+
     updateStats();
 }
 
@@ -925,7 +1209,12 @@ function saveGame(){
         age: age,
         lastLoggedStage: lastLoggedStage,
         expenses: expenses,
-        petMedicalStatus: petMedicalStatus
+        petMedicalStatus: petMedicalStatus,
+        savingsBalance: savingsBalance,
+        savingsInterestTotal: savingsInterestTotal,
+        stockPortfolio: stockPortfolio,
+        resolvedStocks: resolvedStocks,
+        stockCounter: stockCounter
     }
 
     console.log("saveGame() - petName.value:", petName.value, "currentPetName:", currentPetName, "saving as:", gameState.petName);
@@ -967,6 +1256,13 @@ function resetGame(skipConfirm = false) {
         turnsRemaining: 0,
         healthDamagePerTurn: 0
     };
+
+    // Reset banking data
+    savingsBalance = 0;
+    savingsInterestTotal = 0;
+    stockPortfolio = [];
+    resolvedStocks = [];
+    stockCounter = 0;
 
     expenses = {
         food: 0,
@@ -1015,10 +1311,25 @@ function resetGame(skipConfirm = false) {
         medicalAlert.classList.add('hide');
     }
 
+    // Reset banking tabs to wallet view
+    const bankTabs = document.querySelectorAll('.bankTab');
+    const bankTabContents = document.querySelectorAll('.bankTabContent');
+    bankTabs.forEach(tab => tab.classList.remove('active'));
+    bankTabContents.forEach(content => {
+        content.classList.remove('active');
+        content.classList.add('hide');
+    });
+    if (bankTabs[0]) bankTabs[0].classList.add('active');
+    if (bankTabContents[0]) {
+        bankTabContents[0].classList.add('active');
+        bankTabContents[0].classList.remove('hide');
+    }
+
     game.classList.remove('show');
     game.classList.add('hide');
     input.classList.add('hide');
     input.classList.add('hide');
+    document.getElementById('bankingHeader').classList.add('hide');
     play.classList.remove('hide');
 
     if (window.gameDecayInterval) {
@@ -1060,6 +1371,13 @@ function applyLoadedState(s){
     if (s.petMedicalStatus) {
         petMedicalStatus = s.petMedicalStatus;
     }
+
+    // Restore banking data
+    savingsBalance = typeof s.savingsBalance === 'number' ? s.savingsBalance : 0;
+    savingsInterestTotal = typeof s.savingsInterestTotal === 'number' ? s.savingsInterestTotal : 0;
+    stockPortfolio = Array.isArray(s.stockPortfolio) ? s.stockPortfolio : [];
+    resolvedStocks = Array.isArray(s.resolvedStocks) ? s.resolvedStocks : [];
+    stockCounter = typeof s.stockCounter === 'number' ? s.stockCounter : 0;
 }
 
 // ---------------------------------- BUDGET REPORT FUNCTIONS -----------------------------------------
